@@ -24,6 +24,10 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
     $_SESSION['cognome'] = $cognome;
     $_SESSION['mail'] = $mail;
     $_SESSION['telefono'] = $telefono;
+    $_SESSION['genere'] = $genere;
+    $_SESSION['residenza'] = $residenza;
+    $_SESSION['data'] = $data;
+
 
     if(empty($nome)){
         $nomeErr = "Nome obbligatorio";
@@ -98,6 +102,7 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
             $nomeErr = $cognomeErr = $mailErr = $passwordErr = $telefonoErr = $residenzaErr = $dataErr = $message = "";
             $dangerNome = $dangerCognome = $dangerMail = $dangerPassword = $dangerTelefono = $dangerResidenza = $dangerData = "";
             session_unset();
+            header("Location: login.php");
             exit();
         }
     }catch(Exception $ex){
@@ -156,8 +161,9 @@ if (isset($_POST['reset']) && $_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style-reg.css">
-    <title>Document</title>
+    <link rel="stylesheet" href="./css/style-reg.css">
+    <link rel="stylesheet" href="./css/style.css">
+    <title>Registrati</title>
 </head>
 <style>
     .error {
@@ -172,6 +178,12 @@ if (isset($_POST['reset']) && $_SERVER["REQUEST_METHOD"] == "POST") {
 
 </style>
 <body>
+    <header>
+        <div class="logo">
+            <h1>Registrati</h1>
+        </div>
+        <div id="menu"></div>
+    </header>
     <center>
     <div id="form-registration">
     <form class="row g-3" action="<?= htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST">
@@ -216,8 +228,8 @@ if (isset($_POST['reset']) && $_SERVER["REQUEST_METHOD"] == "POST") {
                 <td>
                     <select class="form-control" name="genere">
                         <option value="">Seleziona il genere</option>
-                        <option value="M" <?= ($genere == 'M') ? 'selected' : ''; ?>>Maschio</option>
-                        <option value="F" <?= ($genere == 'F') ? 'selected' : ''; ?>>Femmina</option>
+                        <option value="M" <?= (isset($_SESSION['genere']) && $_SESSION['genere'] == 'M') ? 'selected' : ''; ?>>Maschio</option>
+                        <option value="F" <?= (isset($_SESSION['genere']) && $_SESSION['genere'] == 'F') ? 'selected' : ''; ?>>Femmina</option>
                     </select>
                 </td>
             </tr>
@@ -251,5 +263,6 @@ if (isset($_POST['reset']) && $_SERVER["REQUEST_METHOD"] == "POST") {
 
     </div>
     </center>
+    <script src="script.js"></script>
 </body>
 </html>

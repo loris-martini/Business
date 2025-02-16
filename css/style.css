@@ -5,6 +5,10 @@
     box-sizing: border-box;
 }
 
+.logo {
+    padding: 0.7%;
+}
+
 body {
     font-family: Arial, sans-serif;
     line-height: 1.6;
@@ -38,7 +42,6 @@ header nav ul li a {
 .hero {
     background-image: url('hero-image.jpg');
     background-size: cover;
-    color: white;
     text-align: center;
     padding: 100px 0;
 }

@@ -9,7 +9,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Il Tuo Salone di Parrucchiere</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./css/style.css">
     <script src="script.js" defer></script>
 </head>
 <body>
@@ -17,46 +17,29 @@
         <div class="logo">
             <h1>Il Tuo Salone</h1>
         </div>
-        <nav>
-            <ul>
-                <li><a href="#home">Home</a></li>
-                <li><a href="#services">Servizi</a></li>
-                <li><a href="#gallery">Galleria</a></li>
-                <li><a href="#booking">Prenota Appuntamento</a></li>
-                <li><a href="#contact">Contatti</a></li>
-            </ul>
-        </nav>
+
+        <div id="menu"></div>
     </header>
 
-    <section id="home" class="hero">
-        <h2>Benvenuto nel nostro salone!</h2>
-        <p>Scopri i nostri servizi e prenota il tuo appuntamento comodamente online.</p>
-    </section>
-
-    <section id="services">
-        <h2>I nostri servizi</h2>
-        <div class="service-list">
-            <div class="service">
-                <h3>Taglio e Styling</h3>
-                <p>Tagli moderni e stile su misura per te.</p>
-            </div>
-            <div class="service">
-                <h3>Colorazione</h3>
-                <p>Colori brillanti e duraturi per ogni esigenza.</p>
-            </div>
-            <div class="service">
-                <h3>Trattamenti</h3>
-                <p>Trattamenti rigeneranti per capelli sani e lucenti.</p>
-            </div>
-        </div>
-    </section>
+    <?php if(isset($_SESSION['logged']) && $_SESSION['logged']){?>
+        <section id="home" class="hero">
+            <h2>Benvenuto Stronzo</h2>
+            <p>Prenota il tuo appuntamento comodamente online.</p>
+        </section>
+    <?php }else{ ?>
+        <section id="home" class="hero">
+            <h2>Benvenuto nel nostro salone!</h2>
+            <p>Prenota il tuo appuntamento comodamente online.</p>
+        </section>
+    
+    <?php }; ?>
 
     <section id="gallery">
         <h2>Galleria</h2>
         <div class="gallery-grid">
-            <img src="img1.jpg" alt="Taglio di capelli">
+            <!--<img src="img1.jpg" alt="Taglio di capelli">
             <img src="img2.jpg" alt="Acconciatura elegante">
-            <img src="img3.jpg" alt="Colorazione capelli">
+            <img src="img3.jpg" alt="Colorazione capelli">-->
         </div>
     </section>
 
@@ -88,5 +71,7 @@
     <footer>
         <p>&copy; 2025 Il Tuo Salone di Parrucchiere</p>
     </footer>
+
+    <script src="script.js"></script>
 </body>
 </html>
