@@ -23,7 +23,7 @@
 
     <?php if(isset($_SESSION['logged']) && $_SESSION['logged']){?>
         <section id="home" class="hero">
-            <h2>Benvenuto Stronzo</h2>
+            <h2>Benvenuto User</h2>
             <p>Prenota il tuo appuntamento comodamente online.</p>
         </section>
     <?php }else{ ?>

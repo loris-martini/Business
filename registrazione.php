@@ -20,13 +20,13 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
     $residenza = filtro_testo($_POST['residenza']);
     $data = filtro_testo($_POST['data']);
 
-    $_SESSION['nome'] = $nome;
-    $_SESSION['cognome'] = $cognome;
-    $_SESSION['mail'] = $mail;
-    $_SESSION['telefono'] = $telefono;
-    $_SESSION['genere'] = $genere;
-    $_SESSION['residenza'] = $residenza;
-    $_SESSION['data'] = $data;
+    $_SESSION['local']['nome'] = $nome;
+    $_SESSION['local']['cognome'] = $cognome;
+    $_SESSION['local']['mail'] = $mail;
+    $_SESSION['local']['telefono'] = $telefono;
+    $_SESSION['local']['genere'] = $genere;
+    $_SESSION['local']['residenza'] = $residenza;
+    $_SESSION['local']['data'] = $data;
 
 
     if(empty($nome)){
@@ -152,7 +152,7 @@ if (isset($_POST['reset']) && $_SERVER["REQUEST_METHOD"] == "POST") {
     $nome = $cognome = $mail = $password = $telefono = $genere = $residenza = $data = "";
     $nomeErr = $cognomeErr = $mailErr = $passwordErr = $telefonoErr = $residenzaErr = $dataErr = $message = "";
     $dangerNome = $dangerCognome = $dangerMail = $dangerPassword = $dangerTelefono = $dangerResidenza = $dangerData = "";
-    session_unset();
+    unset($_SESSION['local']);
 }
 ?>
 
@@ -192,21 +192,21 @@ if (isset($_POST['reset']) && $_SERVER["REQUEST_METHOD"] == "POST") {
                 <td><label class="form-label title">Nome</label></td>
                 <td>
                     <span class="error">* <?= $nomeErr;?></span>
-                    <input type="text" class="form-control <?= $dangerNome;?>" name="nome" value="<?= isset($_SESSION['nome']) ? $_SESSION['nome'] : ''?>" placeholder="Nome">
+                    <input type="text" class="form-control <?= $dangerNome;?>" name="nome" value="<?= isset($_SESSION['local']['nome']) ? $_SESSION['local']['nome'] : ''?>" placeholder="Nome">
                 </td>
             </tr>
             <tr>
                 <td><label class="form-label title">Cognome</label></td>
                 <td>
                     <span class="error">* <?= $cognomeErr;?></span>
-                    <input type="text" class="form-control <?= $dangerCognome;?>" name="cognome" value="<?=isset($_SESSION['cognome']) ? $_SESSION['cognome'] : ''?>" placeholder="Cognome">
+                    <input type="text" class="form-control <?= $dangerCognome;?>" name="cognome" value="<?=isset($_SESSION['local']['cognome']) ? $_SESSION['local']['cognome'] : ''?>" placeholder="Cognome">
                 </td>
             </tr>
             <tr>
                 <td><label class="form-label title">E-mail</label></td>
                 <td>
                     <span class="error">* <?= $mailErr;?></span>
-                    <input type="email" class="form-control <?= $dangerMail;?>" name="mail" value="<?=isset($_SESSION['mail']) ? $_SESSION['mail'] : ''?>" placeholder="Mail">
+                    <input type="email" class="form-control <?= $dangerMail;?>" name="mail" value="<?=isset($_SESSION['local']['mail']) ? $_SESSION['local']['mail'] : ''?>" placeholder="Mail">
                 </td>
             </tr>
             <tr>
@@ -220,7 +220,7 @@ if (isset($_POST['reset']) && $_SERVER["REQUEST_METHOD"] == "POST") {
                 <td><label class="form-label title">Numero di Telefono</label></td>
                 <td>
                     <span class="error">* <?= $telefonoErr;?></span>
-                    <input type="text" class="form-control <?= $dangerTelefono;?>" name="telefono" value="<?=isset($_SESSION['telefono']) ? $_SESSION['telefono'] : ''?>" placeholder="Telefono">
+                    <input type="text" class="form-control <?= $dangerTelefono;?>" name="telefono" value="<?=isset($_SESSION['local']['telefono']) ? $_SESSION['local']['telefono'] : ''?>" placeholder="Telefono">
                 </td>
             </tr>
             <tr>
@@ -228,8 +228,8 @@ if (isset($_POST['reset']) && $_SERVER["REQUEST_METHOD"] == "POST") {
                 <td>
                     <select class="form-control" name="genere">
                         <option value="">Seleziona il genere</option>
-                        <option value="M" <?= (isset($_SESSION['genere']) && $_SESSION['genere'] == 'M') ? 'selected' : ''; ?>>Maschio</option>
-                        <option value="F" <?= (isset($_SESSION['genere']) && $_SESSION['genere'] == 'F') ? 'selected' : ''; ?>>Femmina</option>
+                        <option value="M" <?= (isset($_SESSION['local']['genere']) && $_SESSION['local']['genere'] == 'M') ? 'selected' : ''; ?>>Maschio</option>
+                        <option value="F" <?= (isset($_SESSION['local']['genere']) && $_SESSION['local']['genere'] == 'F') ? 'selected' : ''; ?>>Femmina</option>
                     </select>
                 </td>
             </tr>
@@ -237,14 +237,14 @@ if (isset($_POST['reset']) && $_SERVER["REQUEST_METHOD"] == "POST") {
                 <td><label class="form-label title">Residenza</label></td>
                 <td>
                     <span class="error"><?= $residenzaErr;?></span>
-                    <input type="text" class="form-control <?= $dangerResidenza;?>" name="residenza" value="<?=isset($_SESSION['residenza']) ? $_SESSION['residenza'] : ''?>" placeholder="Via Mario Rossi 2">
+                    <input type="text" class="form-control <?= $dangerResidenza;?>" name="residenza" value="<?=isset($_SESSION['local']['residenza']) ? $_SESSION['local']['residenza'] : ''?>" placeholder="Via Mario Rossi 2">
                 </td>
             </tr>
             <tr>
                 <td><label class="form-label title">Data di Nascita</label></td>
                 <td>
                     <span class="error"><?= $dataErr;?></span>
-                    <input type="date" class="form-control <?= $dangerData;?>" name="data" value="<?=isset($_SESSION['data']) ? $_SESSION['data'] : ''?>">
+                    <input type="date" class="form-control <?= $dangerData;?>" name="data" value="<?=isset($_SESSION['local']['data']) ? $_SESSION['local']['data'] : ''?>">
                 </td>
             </tr>
             <tr>
