@@ -4,7 +4,6 @@ include 'connessione.php';
 include 'funzioni.php';
 
 session_start();
-$_SESSION['logged'] = false;
 $mail = $password = "";
 $mailErr = $passwordErr = $message = "";
 $dangerMail = $dangerPassword = "";
@@ -29,7 +28,7 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
     $mail =         @mysqli_real_escape_string($db_conn, strtolower(filtro_testo($_POST['mail'])));
     $password =     @mysqli_real_escape_string($db_conn, filtro_testo($_POST['password']));
 
-    $query = "SELECT pass FROM taccount WHERE mail = ?";
+    $query = "SELECT * FROM tclienti WHERE mail = ?";
 
     try{
         $stmt = mysqli_prepare($db_conn, $query);
@@ -45,7 +44,10 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
             $hashedPassword = $user['pass'];
 
             if(password_verify($password, $hashedPassword)){
-                $_SESSION['logged'] = true;
+                $_SESSION['user']['nome']       = $user['nome'];
+                $_SESSION['user']['cognome']    = $user['cognome'];
+                $_SESSION['user']['mail']       = $user['mail'];
+
                 header("Location: index.php");
                 exit();
             }else{

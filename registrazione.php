@@ -11,14 +11,14 @@ $dangerNome = $dangerCognome = $dangerMail = $dangerPassword = $dangerTelefono =
 $isFormValid = true;
 
 if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
-    $nome = filtro_testo($_POST['nome']);
-    $cognome = filtro_testo($_POST['cognome']);
-    $mail = filtro_testo($_POST['mail']);
-    $password = filtro_testo($_POST['password']);
-    $telefono = filtro_testo($_POST['telefono']);
-    $genere = filtro_testo($_POST['genere']);
-    $residenza = filtro_testo($_POST['residenza']);
-    $data = filtro_testo($_POST['data']);
+    $nome =         filtro_testo($_POST['nome']);
+    $cognome =      filtro_testo($_POST['cognome']);
+    $mail =         filtro_testo($_POST['mail']);
+    $password =     filtro_testo($_POST['password']);
+    $telefono =     filtro_testo($_POST['telefono']);
+    $genere =       filtro_testo($_POST['genere']);
+    $residenza =    filtro_testo($_POST['residenza']);
+    $data =         filtro_testo($_POST['data']);
 
     $_SESSION['local']['nome'] = $nome;
     $_SESSION['local']['cognome'] = $cognome;
@@ -87,7 +87,7 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
         $valori[':data_nascita'] = $data;
     }
 
-    $query = "INSERT INTO taccount (" . implode(", ", $campi) . ") VALUES (" . implode(", ", $segnaposti) . ")";
+    $query = "INSERT INTO tclienti (" . implode(", ", $campi) . ") VALUES (" . implode(", ", $segnaposti) . ")";
 
     try{
         $stmt = mysqli_prepare($db_conn, $query);
@@ -106,6 +106,7 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
             exit();
         }
     }catch(Exception $ex){
+        $message = mysqli_error($db_conn);
         if (@mysqli_errno($db_conn) == 1062) { 
             if (strpos(mysqli_error($db_conn), 'mail') !== false) {
                 $mailErr = "La Mail è già stata registrata";
