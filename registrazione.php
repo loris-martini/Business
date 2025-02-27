@@ -58,38 +58,38 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($isFormValid) {
  
-    $nome =         @mysqli_real_escape_string($db_conn, ucwords(strtolower(filtro_testo($_POST['nome']))));
-    $cognome =      @mysqli_real_escape_string($db_conn, ucwords(strtolower(filtro_testo($_POST['cognome']))));
-    $mail =         @mysqli_real_escape_string($db_conn, strtolower(filtro_testo($_POST['mail'])));
-    $password =     password_hash(@mysqli_real_escape_string($db_conn, filtro_testo($_POST['password'])), PASSWORD_BCRYPT);
-    $telefono =     @mysqli_real_escape_string($db_conn, filtro_testo($_POST['telefono']));
-    $genere =       @mysqli_real_escape_string($db_conn, filtro_testo($_POST['genere']));
-    $residenza =    @mysqli_real_escape_string($db_conn, filtro_testo($_POST['residenza']));
-    $data =         @mysqli_real_escape_string($db_conn, filtro_testo($_POST['data']));
+    try{    
+        $nome =         @mysqli_real_escape_string($db_conn, ucwords(strtolower(filtro_testo($_POST['nome']))));
+        $cognome =      @mysqli_real_escape_string($db_conn, ucwords(strtolower(filtro_testo($_POST['cognome']))));
+        $mail =         @mysqli_real_escape_string($db_conn, strtolower(filtro_testo($_POST['mail'])));
+        $password =     password_hash(@mysqli_real_escape_string($db_conn, filtro_testo($_POST['password'])), PASSWORD_BCRYPT);
+        $telefono =     @mysqli_real_escape_string($db_conn, filtro_testo($_POST['telefono']));
+        $genere =       @mysqli_real_escape_string($db_conn, filtro_testo($_POST['genere']));
+        $residenza =    @mysqli_real_escape_string($db_conn, filtro_testo($_POST['residenza']));
+        $data =         @mysqli_real_escape_string($db_conn, filtro_testo($_POST['data']));
 
-    $campi = ['nome', 'cognome', 'mail', 'pass', 'numero_telefono'];
-    $segnaposti = ['?', '?', '?', '?', '?'];
-    $valori = [':nome' => $nome, ':cognome' => $cognome, ':mail' => $mail, ':pass' => $password, ':numero_telefono' => $telefono];
+        $campi = ['nome', 'cognome', 'mail', 'pass', 'numero_telefono'];
+        $segnaposti = ['?', '?', '?', '?', '?'];
+        $valori = [':nome' => $nome, ':cognome' => $cognome, ':mail' => $mail, ':pass' => $password, ':numero_telefono' => $telefono];
 
-    if ($genere !== null) {
-        $campi[] = 'genere';
-        $segnaposti[] = '?';
-        $valori[':genere'] = $genere;
-    }
-    if ($residenza !== null) {
-        $campi[] = 'residenza';
-        $segnaposti[] = '?';
-        $valori[':residenza'] = $residenza;
-    }
-    if ($data !== null) {
-        $campi[] = 'data_nascita';
-        $segnaposti[] = '?';
-        $valori[':data_nascita'] = $data;
-    }
+        if ($genere !== null) {
+            $campi[] = 'genere';
+            $segnaposti[] = '?';
+            $valori[':genere'] = $genere;
+        }
+        if ($residenza !== null) {
+            $campi[] = 'residenza';
+            $segnaposti[] = '?';
+            $valori[':residenza'] = $residenza;
+        }
+        if ($data !== null) {
+            $campi[] = 'data_nascita';
+            $segnaposti[] = '?';
+            $valori[':data_nascita'] = $data;
+        }
 
-    $query = "INSERT INTO tclienti (" . implode(", ", $campi) . ") VALUES (" . implode(", ", $segnaposti) . ")";
+        $query = "INSERT INTO tclienti (" . implode(", ", $campi) . ") VALUES (" . implode(", ", $segnaposti) . ")";
 
-    try{
         $stmt = mysqli_prepare($db_conn, $query);
 
         $tipi = str_repeat('s', count($valori));
