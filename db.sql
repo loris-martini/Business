@@ -1,6 +1,6 @@
 DROP DATABASE IF EXISTS my_salone;
 
-CREATE DATABASE my_salone DEFAULT CHARACTER SET = utf8;
+CREATE DATABASE my_salone DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 USE my_salone;
 
@@ -36,10 +36,10 @@ BEFORE INSERT ON tclienti
 FOR EACH ROW
 BEGIN
     IF CHAR_LENGTH(NEW.nome) < 2 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'nome';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Il nome deve contenere almeno 2 caratteri';
     END IF;
     IF CHAR_LENGTH(NEW.cognome) < 2 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'cognome';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Il cognome deve contenere almeno 2 caratteri';
     END IF;
 END $$
 
@@ -48,10 +48,10 @@ BEFORE UPDATE ON tclienti
 FOR EACH ROW
 BEGIN
     IF CHAR_LENGTH(NEW.nome) < 2 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'nome';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Il nome deve contenere almeno 2 caratteri';
     END IF;
     IF CHAR_LENGTH(NEW.cognome) < 2 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'cognome';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Il cognome deve contenere almeno 2 caratteri';
     END IF;
 END $$
 
@@ -60,7 +60,7 @@ BEFORE INSERT ON tclienti
 FOR EACH ROW
 BEGIN
     IF NEW.data_nascita > CURDATE() THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'data';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'La data di nascita non può essere nel futuro';
     END IF;
 END $$
 
@@ -69,7 +69,7 @@ BEFORE UPDATE ON tclienti
 FOR EACH ROW
 BEGIN
     IF NEW.data_nascita > CURDATE() THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'data';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'La data di nascita non può essere nel futuro';
     END IF;
 END $$
 
@@ -78,7 +78,7 @@ BEFORE INSERT ON tclienti
 FOR EACH ROW
 BEGIN   
     IF NEW.numero_telefono NOT REGEXP '^[0-9]{10}$' THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'numero';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Il numero di telefono deve essere composto da 10 cifre';
     END IF;
 END $$  
 
@@ -87,7 +87,7 @@ BEFORE UPDATE ON tclienti
 FOR EACH ROW
 BEGIN   
     IF NEW.numero_telefono NOT REGEXP '^[0-9]{10}$' THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'numero';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Il numero di telefono deve essere composto da 10 cifre';
     END IF;
 END $$  
 
@@ -96,7 +96,7 @@ BEFORE INSERT ON tclienti
 FOR EACH ROW
 BEGIN
     IF NOT NEW.mail REGEXP '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'mail';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Formato email non valido';
     END IF;
 END $$
 
@@ -105,25 +105,7 @@ BEFORE UPDATE ON tclienti
 FOR EACH ROW
 BEGIN
     IF NOT NEW.mail REGEXP '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'mail';
-    END IF;
-END $$
-
-CREATE TRIGGER trg_password_insert
-BEFORE INSERT ON tclienti
-FOR EACH ROW
-BEGIN
-    IF NOT NEW.pass REGEXP '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}|;:,.<>?/-]).{8,}$' THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'password';
-    END IF;
-END $$
-
-CREATE TRIGGER trg_password_update
-BEFORE UPDATE ON tclienti
-FOR EACH ROW
-BEGIN
-    IF NOT NEW.pass REGEXP '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}|;:,.<>?/-]).{8,}$' THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'password';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Formato email non valido';
     END IF;
 END $$
 

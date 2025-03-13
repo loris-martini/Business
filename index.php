@@ -58,10 +58,11 @@
 
         <div id="menu"></div>
     </header>
+    <main>
 
     <?php if(isset($_SESSION['user'])){?>
         <section id="home" class="hero">
-            <h2>Benvenuto <?=$_SESSION['user']['nome']?> <?=$_SESSION['user']['cognome']?></h2>
+            <h2>Benvenuto, <?=$_SESSION['user']['nome']?> <?=$_SESSION['user']['cognome']?>!</h2>
             <p>Prenota il tuo appuntamento qua sotto!</p>
         </section>
     <?php }else{ ?>
@@ -89,37 +90,37 @@
             <form class="row g-3" id="form-registration" action="<?= htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST">
                 <table>
                     <tr>
-                        <td><label class="form-label title">Nome</label></td>
+                        <td><label>Nome</label></td>
                         <td>
-                            <input type="text" class="form-control" name="nome" value="<?= $_SESSION['user']['nome'] ?? '' ?>" readonly>
+                            <input type="text" name="nome" value="<?= $_SESSION['user']['nome'] ?? '' ?>" readonly>
                         </td>
                     </tr>
                     <tr>
                         <td><label class="form-label title">Cognome</label></td>
                         <td>
-                            <input type="text" class="form-control" name="cognome" value="<?= $_SESSION['user']['cognome'] ?? '' ?>" readonly>
+                            <input type="text" name="cognome" value="<?= $_SESSION['user']['cognome'] ?? '' ?>" readonly>
                         </td>
                     </tr>
                     <tr>
                         <td><label class="form-label title">E-mail</label></td>
                         <td>
-                            <input type="email" class="form-control" name="mail" value="<?= $_SESSION['user']['mail'] ?? '' ?>" readonly>
+                            <input type="email" name="mail" value="<?= $_SESSION['user']['mail'] ?? '' ?>" readonly>
                         </td>
                     </tr>
                     <tr>
                         <td><label class="form-label title">Servizio</label></td>
                         <td>
-                            <select class="form-control" name="service">
+                            <select name="service">
                                 <option value="taglio">Taglio</option>
                             </select>
                         </td>
                     </tr>
                     <tr>
-                        <td><label class="form-label title">Data e Ora</label></td>
+                        <td><label>Data e Ora</label></td>
                         <td>
                             <section id="date-time">
-                                <input type="date" class="form-control" name="date" required>
-                                <input type="time" class="form-control" name="time" required>
+                                <input type="date" name="date" required>
+                                <input type="time" name="time" required>
                             </section>
                         </td>
                     </tr>
@@ -140,15 +141,15 @@
         <center>
         <br>
         <h2>Per prenotare devi prima registrarti!</h2>
-        <center>
+        </center>
     <?php }; ?>
-
+    </main>
     <section id="contact">
         <h2>Contattaci</h2>
         <p>Email: info@tuosalone.com</p>
         <p>Telefono: +39 012 3456789</p>
     </section>
-
+        <br>
     <footer>
         <p>&copy; 2025 Il Tuo Salone di Parrucchiere</p>
     </footer>

@@ -1,152 +1,150 @@
-/* Reset di base */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* Importa font eleganti */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Poppins:wght@300;400;600&display=swap');
+
+:root {
+    --primary-color: #3d3b3b;
+    --secondary-color: #c0a080;
+    --background-color: #f5f5f5;
+    --text-color: #2a2a2a;
+    --accent-color: #e6c29c;
+    --white: #fff;
+    --black: #222;
 }
 
-.logo {
-    padding: 0.7%;
+html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 body {
-    font-family: Arial, sans-serif;
-    line-height: 1.6;
-    color: #333;
-    background-color: #f4f4f4;
+    font-family: 'Poppins', sans-serif;
+    background: url('../img/mountains.jpg') center/cover;
+    /*background-color: var(--background-color);*/
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    text-align: center;
 }
 
 header {
-    background-color: #2c3e50;
-    color: white;
+    background-color: var(--primary-color);
+    padding: 20px;
+    color: var(--white);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+main {
+    flex-grow: 1;
+}
+
+.error {
+    color: #FF0000;
+    font-size: 0.875rem;
+}
+
+.error-box {
+    border: 2px solid red !important;
+    background-color: #ffe5e5 !important;
+    border-radius: 5px;
+    font-size: 0.875rem;
+}
+
+.logo h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0;
+}
+
+nav {
+    background-color: var(--primary-color);
     padding: 10px 0;
     text-align: center;
 }
 
-header nav ul {
+nav ul {
     list-style: none;
+    margin: 0;
     padding: 0;
-}
-
-header nav ul li {
-    display: inline;
-    margin: 0 20px;
-}
-
-header nav ul li a {
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-.hero {
-    background-image: url('hero-image.jpg');
-    background-size: cover;
-    text-align: center;
-    padding: 100px 0;
-}
-
-.hero h2 {
-    font-size: 2.5em;
-}
-
-.hero p {
-    font-size: 1.2em;
-}
-
-#services, #gallery, #contact {
-    padding: 40px 10%;
-    text-align: center;
-}
-
-.service-list {
     display: flex;
-    justify-content: space-around;
-    margin-top: 30px;
-}
-
-.service {
-    background: #ecf0f1;
-    padding: 20px;
-    border-radius: 10px;
-    width: 30%;
-}
-
-.service h3 {
-    font-size: 1.5em;
-}
-
-#gallery {
-    background-color: #fff;
-    padding: 40px 10%;
-}
-
-.gallery-grid {
-    display: flex;
-    justify-content: space-between;
-}
-
-.gallery-grid img {
-    width: 30%;
-    border-radius: 10px;
-    transition: transform 0.3s ease;
-}
-
-.gallery-grid img:hover {
-    transform: scale(1.05);
-}
-
-#booking {
-    background-color: #ecf0f1;
-    padding: 40px 10%;
-}
-
-form {
-    display: grid;
+    justify-content: center;
     gap: 20px;
 }
 
-label {
-    font-weight: bold;
+nav ul li {
+    display: inline;
 }
 
-input, select, button {
-    padding: 10px;
-    font-size: 1em;
+nav ul li a {
+    color: var(--white);
+    text-decoration: none;
+    font-size: 18px;
+    padding: 10px 15px;
+    transition: color 0.3s ease;
 }
 
-button {
-    background-color: #2c3e50;
-    color: white;
+nav ul li a:hover {
+    color: var(--accent-color);
+}
+
+.hero {
+    /*background: url('../img/mountains.jpg') center/cover;*/
+    color: var(--white);
+    padding: 80px 20px;
+}
+
+h2 {
+    font-size: 36px;
+    margin-bottom: 10px;
+    color: var(--white);
+}
+
+.hero p {
+    font-size: 18px;
+}
+
+.btn {
+    background-color: var(--secondary-color);
+    color: var(--white);
+    padding: 10px 20px;
     border: none;
+    border-radius: 5px;
     cursor: pointer;
+    font-size: 18px;
+    transition: background 0.3s ease;
 }
 
-button:hover {
-    background-color: #34495e;
+.btn:hover {
+    background-color: var(--accent-color);
 }
+    
 
 footer {
-    background-color: #2c3e50;
-    color: white;
+    background: var(--primary-color);
+    color: var(--white);
+    padding: 10px;
     text-align: center;
-    padding: 10px 0;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
 }
 
-@media (max-width: 768px) {
-    .service-list {
-        flex-direction: column;
-    }
+#contact {
+    color: var(--white);
+    padding: 40px 20px;
+    margin-top: 40px;
+}
 
-    .gallery-grid {
-        flex-direction: column;
-    }
+#contact h2 {
+    font-size: 28px;
+    margin-bottom: 10px;
+}
 
-    .gallery-grid img {
-        width: 100%;
-        margin-bottom: 20px;
-    }
+#contact p {
+    font-size: 18px;
+}
+
+footer p {
+    font-size: 14px;
 }

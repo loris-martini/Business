@@ -9,12 +9,13 @@ $nome = $cognome = $mail = $password = $telefono = $genere = $residenza = $data 
 $nomeErr = $cognomeErr = $mailErr = $passwordErr = $telefonoErr = $residenzaErr = $dataErr = $message = "";
 $dangerNome = $dangerCognome = $dangerMail = $dangerPassword = $dangerTelefono = $dangerResidenza = $dangerData = "";
 $isFormValid = true;
+$pattern = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+={}|;:,.<>?\/-]).{8,}$/';  //password
 
 if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
     $nome =         filtro_testo($_POST['nome']);
     $cognome =      filtro_testo($_POST['cognome']);
     $mail =         filtro_testo($_POST['mail']);
-    $password =     filtro_testo($_POST['password']);
+    $password =     $_POST['password'];
     $telefono =     filtro_testo($_POST['telefono']);
     $genere =       filtro_testo($_POST['genere']);
     $residenza =    filtro_testo($_POST['residenza']);
@@ -27,7 +28,6 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
     $_SESSION['local']['genere'] = $genere;
     $_SESSION['local']['residenza'] = $residenza;
     $_SESSION['local']['data'] = $data;
-
 
     if(empty($nome)){
         $nomeErr = "Nome obbligatorio";
@@ -46,6 +46,11 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
     }
     if(empty($password)){
         $passwordErr = "Password obbligatoria";
+        $dangerPassword = 'error-box';
+        $isFormValid = false;
+    }elseif (!preg_match($pattern, $password)) { 
+        //$passwordErr = "La password deve contenere almeno 8 caratteri, una lettera maiuscola, una lettera minuscola, un numero e un carattere speciale";
+        $passwordErr = $password;
         $dangerPassword = 'error-box';
         $isFormValid = false;
     }
@@ -162,22 +167,10 @@ if (isset($_POST['reset']) && $_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./css/style-reg.css">
     <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/style-index.css">
     <title>Registrati</title>
 </head>
-<style>
-    .error {
-        color: #FF0000;
-    }
-
-    .error-box {
-        border: 2px solid red;
-        background-color: #ffe5e5;
-        border-radius: 5px;
-        }
-
-</style>
 <body>
     <header>
         <div class="logo">
@@ -185,6 +178,7 @@ if (isset($_POST['reset']) && $_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
         <div id="menu"></div>
     </header>
+    <main>
     <center>
     <div id="form-registration">
     <form class="row g-3" action="<?= htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST">
@@ -255,8 +249,8 @@ if (isset($_POST['reset']) && $_SERVER["REQUEST_METHOD"] == "POST") {
             </tr>
             <tr>
                 <td colspan="2">
-                    <input class="btn" type="submit" name="reset" value="Cancella">
                     <input class="btn" type="submit" name="submit" value="Registrati">
+                    <input class="btn" type="submit" name="reset" value="Cancella">
                 </td>
             </tr>
         </table>
@@ -264,6 +258,10 @@ if (isset($_POST['reset']) && $_SERVER["REQUEST_METHOD"] == "POST") {
 
     </div>
     </center>
+    </main>
+    <footer>
+        <p>&copy; 2025 Il Tuo Salone di Parrucchiere</p>
+    </footer>
     <script src="script.js"></script>
 </body>
 </html>

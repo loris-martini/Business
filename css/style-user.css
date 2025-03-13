@@ -1,0 +1,139 @@
+.user-info {
+    background: var(--white);
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+    width: 60%;
+    margin: 40px auto;
+}
+
+.user-info table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.user-info td {
+    padding: 12px;
+    border: 1px solid var(--primary-color);
+}
+
+.user-info td:first-child {
+    font-weight: 800;
+}
+
+form {
+    margin-top: 20px;
+}
+
+form input[type="text"], form input[type="date"], form input[type="submit"] {
+    color: var(--text-color);
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--background-color);
+    font-size: 18px;
+    transition: all 0.3s ease;
+    width: 80%;
+    margin-bottom: 15px; /* Distanza tra gli input */
+    outline: none; /* Rimuove il bordo blu di default */
+}
+
+form input[type="text"]:focus, form input[type="date"]:focus {
+    background-color: var(--accent-color);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+form input[type="submit"] {
+    background-color: var(--secondary-color);
+    color: var(--white);
+    cursor: pointer;
+}
+
+form input[type="submit"]:hover {
+    background-color: var(--accent-color);
+}
+
+/*delete*/
+input[type="submit"][name="delete"] {
+    background-color: #f44336;
+}
+
+input[type="submit"][name="delete"]:hover {
+    background-color: #d32f2f;
+}
+
+input[type="submit"][name="delete"]:active {
+    background-color: #c62828;
+}
+
+/*logout*/
+input[type="submit"][name="logout"] {
+    background-color: #f49236;
+}
+
+input[type="submit"][name="logout"]:hover {
+    background-color: #d36b2f;
+}
+
+input[type="submit"][name="logout"]:active {
+    background-color: #c68128;
+}
+
+/*salva*/
+input[type="submit"][name="update"] {
+    background-color: #4ad345;
+}
+
+input[type="submit"][name="update"]:hover {
+    background-color: #35a526;
+}
+
+input[type="submit"][name="update"]:active {
+    background-color: #3ac628;
+}
+
+form select {
+    color: var(--text-color);
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--background-color);
+    font-size: 18px;
+    transition: all 0.3s ease;
+    width: 85%;
+    margin-bottom: 15px;
+    outline: none;
+    -webkit-appearance: none; 
+    -moz-appearance: none;
+}
+
+form select:focus {
+    background-color: var(--accent-color);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+form select option {
+    background-color: var(--white);
+    color: var(--text-color);
+    padding: 10px;
+}
+
+form select option:hover {
+    background-color: var(--accent-color);
+}
+
+.btn {
+    background-color: var(--secondary-color);
+    color: var(--white);
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background 0.3s ease;
+}
+
+.btn:hover {
+    background-color: var(--accent-color);
+}
