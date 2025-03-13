@@ -49,8 +49,7 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
         $dangerPassword = 'error-box';
         $isFormValid = false;
     }elseif (!preg_match($pattern, $password)) { 
-        //$passwordErr = "La password deve contenere almeno 8 caratteri, una lettera maiuscola, una lettera minuscola, un numero e un carattere speciale";
-        $passwordErr = $password;
+        $passwordErr = "La password deve contenere almeno 8 caratteri, una lettera maiuscola, una lettera minuscola, un numero e un carattere speciale";
         $dangerPassword = 'error-box';
         $isFormValid = false;
     }
@@ -73,9 +72,9 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
         $residenza =    @mysqli_real_escape_string($db_conn, filtro_testo($_POST['residenza']));
         $data =         @mysqli_real_escape_string($db_conn, filtro_testo($_POST['data']));
 
-        $campi = ['nome', 'cognome', 'mail', 'pass', 'numero_telefono'];
+        $campi = ['nome', 'cognome', 'mail', 'password', 'numero_telefono'];
         $segnaposti = ['?', '?', '?', '?', '?'];
-        $valori = [':nome' => $nome, ':cognome' => $cognome, ':mail' => $mail, ':pass' => $password, ':numero_telefono' => $telefono];
+        $valori = [':nome' => $nome, ':cognome' => $cognome, ':mail' => $mail, ':password' => $password, ':numero_telefono' => $telefono];
 
         if ($genere !== null) {
             $campi[] = 'genere';
@@ -93,7 +92,7 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
             $valori[':data_nascita'] = $data;
         }
 
-        $query = "INSERT INTO tclienti (" . implode(", ", $campi) . ") VALUES (" . implode(", ", $segnaposti) . ")";
+        $query = "INSERT INTO clienti (" . implode(", ", $campi) . ") VALUES (" . implode(", ", $segnaposti) . ")";
 
         $stmt = mysqli_prepare($db_conn, $query);
 

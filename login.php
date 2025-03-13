@@ -28,7 +28,7 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
     $mail =         @mysqli_real_escape_string($db_conn, strtolower(filtro_testo($_POST['mail'])));
     $password =     @mysqli_real_escape_string($db_conn, filtro_testo($_POST['password']));
 
-    $query = "SELECT * FROM tclienti WHERE mail = ?";
+    $query = "SELECT * FROM clienti WHERE mail = ?";
 
     try{
         $stmt = mysqli_prepare($db_conn, $query);
@@ -41,7 +41,7 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
 
         if(mysqli_num_rows($result) > 0){
             $user = mysqli_fetch_assoc($result);
-            $hashedPassword = $user['pass'];
+            $hashedPassword = $user['password'];
 
             if(password_verify($password, $hashedPassword)){
                 $_SESSION['user']['nome']       = $user['nome'];

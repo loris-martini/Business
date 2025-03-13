@@ -9,9 +9,9 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 
+$message = '';
 try {
-    // Query per ottenere i dati dell'utente
-    $query = "SELECT nome, cognome, mail, numero_telefono, genere, residenza, data_nascita FROM tclienti WHERE mail = ?";
+    $query = "SELECT nome, cognome, mail, numero_telefono, genere, residenza, data_nascita FROM clienti WHERE mail = ?";
     $stmt = mysqli_prepare($db_conn, $query);
     mysqli_stmt_bind_param($stmt, "s", $_SESSION['user']['mail']);
     mysqli_stmt_execute($stmt);
@@ -21,60 +21,54 @@ try {
         $user = mysqli_fetch_assoc($result);
     }
 
-    // Aggiornamento dei dati dell'utente
     if (isset($_POST['update']) && $_SERVER["REQUEST_METHOD"] == "POST") {
-        // Recupera e sanifica i dati inviati
-        $nome = isset($_POST['nome']) ? mysqli_real_escape_string($db_conn, ucwords(strtolower(filtro_testo($_POST['nome'])))) : null;
-        $cognome = isset($_POST['cognome']) ? mysqli_real_escape_string($db_conn, ucwords(strtolower(filtro_testo($_POST['cognome'])))) : null;
-        $telefono = isset($_POST['telefono']) ? mysqli_real_escape_string($db_conn, filtro_testo($_POST['telefono'])) : null;
-        $genere = isset($_POST['genere']) ? mysqli_real_escape_string($db_conn, filtro_testo($_POST['genere'])) : null;
-        $residenza = isset($_POST['residenza']) ? mysqli_real_escape_string($db_conn, filtro_testo($_POST['residenza'])) : null;
-        $data = isset($_POST['data_nascita']) ? mysqli_real_escape_string($db_conn, filtro_testo($_POST['data_nascita'])) : null;
+        $nome =         isset($_POST['nome']) && !empty($_POST['nome']) ? mysqli_real_escape_string($db_conn, ucwords(strtolower(filtro_testo($_POST['nome'])))) : null;
+        $cognome =      isset($_POST['cognome']) && !empty($_POST['cognome']) ? mysqli_real_escape_string($db_conn, ucwords(strtolower(filtro_testo($_POST['cognome'])))) : null;
+        $telefono =     isset($_POST['telefono']) && !empty($_POST['telefono']) ? mysqli_real_escape_string($db_conn, filtro_testo($_POST['telefono'])) : null;
+        $genere =       isset($_POST['genere']) ? mysqli_real_escape_string($db_conn, filtro_testo($_POST['genere'])) : null;
+        $residenza =    isset($_POST['residenza']) ? mysqli_real_escape_string($db_conn, filtro_testo($_POST['residenza'])) : null;
+        $data =         isset($_POST['data_nascita']) ? mysqli_real_escape_string($db_conn, filtro_testo($_POST['data_nascita'])) : null;
 
-        // Array per memorizzare i campi da aggiornare e i valori da inserire
         $campi = [];
         $valori = [];
 
-        // Aggiungi i campi che l'utente ha aggiornato
-        if ($nome !== null) {
-            $campi[] = 'nome = ?';
-            $valori[] = $nome;
-        }
-        if ($cognome !== null) {
-            $campi[] = 'cognome = ?';
-            $valori[] = $cognome;
-        }
-        if ($telefono !== null) {
-            $campi[] = 'numero_telefono = ?';
-            $valori[] = $telefono;
-        }
-        if ($genere !== null) {
-            $campi[] = 'genere = ?';
-            $valori[] = $genere;
-        }
-        if ($residenza !== null) {
-            $campi[] = 'residenza = ?';
-            $valori[] = $residenza;
-        }
-        if ($data !== null) {
-            $campi[] = 'data_nascita = ?';
-            $valori[] = $data;
+        if($nome == null || $cognome == null || $telefono == null){
+            $message = "Stai cancellando campi obbligatori.";
+        }else{
+            if ($nome !== null) {
+                $campi[] = 'nome = ?';
+                $valori[] = $nome;
+            }
+            if ($cognome !== null) {
+                $campi[] = 'cognome = ?';
+                $valori[] = $cognome;
+            }
+            if ($telefono !== null) {
+                $campi[] = 'numero_telefono = ?';
+                $valori[] = $telefono;
+            }
+            if ($genere !== null) {
+                $campi[] = 'genere = ?';
+                $valori[] = $genere;
+            }
+            if ($residenza !== null) {
+                $campi[] = 'residenza = ?';
+                $valori[] = $residenza;
+            }
+            if ($data !== null) {
+                $campi[] = 'data_nascita = ?';
+                $valori[] = $data;
+            }
         }
 
-        // Se ci sono campi da aggiornare
         if (count($campi) > 0) {
-            // Aggiungi la condizione per la mail dell'utente
-            $query = "UPDATE tclienti SET " . implode(", ", $campi) . " WHERE mail = ?";
+            $query = "UPDATE clienti SET " . implode(", ", $campi) . " WHERE mail = ?";
             $stmt = mysqli_prepare($db_conn, $query);
-
-            // Lega i parametri: il numero di parametri è la lunghezza dell'array $valori più 1 per la mail
-            $types = str_repeat('s', count($valori)) . 's';  // Tutti 's' per stringa, tranne la mail
+            $types = str_repeat('s', count($valori)) . 's';
             $params = array_merge($valori, [$_SESSION['user']['mail']]);
             mysqli_stmt_bind_param($stmt, $types, ...$params);
 
-            // Esegui la query
             if (mysqli_stmt_execute($stmt)) {
-                // Aggiorna la sessione con i nuovi dati
                 foreach ($valori as $index => $valore) {
                     if ($campi[$index] == 'nome = ?') $_SESSION['user']['nome'] = $valore;
                     if ($campi[$index] == 'cognome = ?') $_SESSION['user']['cognome'] = $valore;
@@ -86,7 +80,7 @@ try {
                 header("Location: ".$_SERVER['PHP_SELF']);
                 exit();
             } else {
-                echo "Errore nell'aggiornamento dei dati.";
+                $message = "Errore nell'aggiornamento dei dati.";
             }
         }
     }
@@ -99,7 +93,7 @@ try {
 
     // Cancellazione dei dati dell'utente
     if (isset($_POST['delete']) && $_SERVER["REQUEST_METHOD"] == "POST") {
-        $query = "DELETE FROM tclienti WHERE mail = ?";
+        $query = "DELETE FROM clienti WHERE mail = ?";
         $stmt = mysqli_prepare($db_conn, $query);
         mysqli_stmt_bind_param($stmt, "s", $_SESSION['user']['mail']);
         mysqli_stmt_execute($stmt);
@@ -172,6 +166,10 @@ try {
                     <td><input type="date" name="data_nascita" value="<?= htmlspecialchars($user['data_nascita']); ?>"></td>
                 </tr>
             </table>
+
+            <?php if(!empty($message)){?>
+            <div class="error-box"><?=$message; ?></div>
+            <?php };?>
 
             <input type="submit" name="update" value="Salva Modifiche" class="btn">
         </form>
