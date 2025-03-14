@@ -21,7 +21,7 @@
 }
 
 #date-time{
-  display: flex;
+  /*display: flex;*/
 }
 
 /* Input Fields Container */
@@ -144,4 +144,44 @@ input[type="submit"]:hover, input[type="submit"][name="reset"]:hover {
 input[type="text"]:disabled, input[type="email"]:disabled, input[type="password"]:disabled, input[type="date"]:disabled, select:disabled {
   background-color: #f2f2f2;
   cursor: not-allowed;
+}
+
+/*
+#slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+  */
+
+#slots {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 colonne di larghezza uguale */
+  gap: 10px;
+  margin-top: 10px;
+}
+
+
+.slot {
+  padding: 10px;
+  border: 1px solid black;
+  background-color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.slot:hover {
+  background-color: lightgray;
+}
+
+.slot.unavailable {
+  background-color: red;
+  color: white;
+  cursor: not-allowed;
+}
+
+.slot.selected {
+  background-color: green;
+  color: white;
 }

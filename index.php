@@ -3,41 +3,44 @@
     include 'funzioni.php';
 
     session_start();
-    $servizio = $date = $time = $message = '';
-    $isFormValid = true;
 
-    if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
-        $date = filtro_testo($_POST['date']);   
-        $time = filtro_testo($_POST['time']);
+    if(isset($_SESSION['user'])){
+        $servizio = $date = $time = $message = '';
+        $isFormValid = true;
 
-        if(empty($date)){
-            $isFormValid = false;
-        }if(empty($time)){
-            $isFormValid = false;
-        }
+        $query = "SELECT mail, nome, cognome FROM barbieri";
+        $result = mysqli_query($db_conn, $query);
 
-        if($isFormValid){
-            $date       = @mysqli_real_escape_string($db_conn, filtro_testo($_POST['date']));
-            $time       = @mysqli_real_escape_string($db_conn, filtro_testo($_POST['time']));
-            $servizio   = @mysqli_real_escape_string($db_conn, ucwords(strtolower(filtro_testo($_POST['service']))));
-        }
+        if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
+            $date = filtro_testo($_POST['date']);   
+            $time = filtro_testo($_POST['time']);
 
-        $query = "INSERT INTO tappuntamenti (servizio, data_app, ora_inizio, fk_cliente) VALUES (?, ?, ?, ?)";
+            if(empty($date) || empty($time)){
+                $isFormValid = false;
+                $message = "Tutti i campi sono obbligatori.";
+            }else{
+                $date       = @mysqli_real_escape_string($db_conn, filtro_testo($_POST['date']));
+                $time       = @mysqli_real_escape_string($db_conn, filtro_testo($_POST['time']));
+                $servizio   = @mysqli_real_escape_string($db_conn, ucwords(strtolower(filtro_testo($_POST['service']))));
 
-        try{
-            $stmt = mysqli_prepare($db_conn, $query);
+                $query = "INSERT INTO appuntamenti (servizio, data_app, ora_inizio, fk_cliente) VALUES (?, ?, ?, ?)";
 
-            mysqli_stmt_bind_param($stmt, "ssss", $servizio, $date, $time, $_SESSION['user']['mail']);
+                try{
+                    $stmt = mysqli_prepare($db_conn, $query);
 
-            if(mysqli_stmt_execute($stmt)){
-                $message = "Appuntamento prenotato con successo!";
-                $servizio = $date = $time = '';
+                    mysqli_stmt_bind_param($stmt, "ssss", $servizio, $date, $time, $_SESSION['user']['mail']);
+
+                    if(mysqli_stmt_execute($stmt)){
+                        $message = "Appuntamento prenotato con successo!";
+                        $servizio = $date = $time = '';
+                    }
+                }catch(Exception $ex){
+                    $message = mysqli_error($db_conn);
+                }
             }
-        }catch(Exception $ex){
-            $message = mysqli_error($db_conn);
         }
     }
-
+    
 ?>
 
 <!DOCTYPE html>
@@ -89,6 +92,7 @@
             <h2>Prenota il tuo appuntamento</h2>
             <form class="row g-3" id="form-registration" action="<?= htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST">
                 <table>
+                    <!--INFO-->
                     <tr>
                         <td><label>Nome</label></td>
                         <td>
@@ -107,6 +111,7 @@
                             <input type="email" name="mail" value="<?= $_SESSION['user']['mail'] ?? '' ?>" readonly>
                         </td>
                     </tr>
+                    <!--SERVIZIO-->
                     <tr>
                         <td><label class="form-label title">Servizio</label></td>
                         <td>
@@ -115,12 +120,28 @@
                             </select>
                         </td>
                     </tr>
+                    <!--BARBIERE-->
+                    <tr>
+                        <td><label class="form-label title">Scegli il barbiere</label></td>
+                        <td>
+                            <select id="barbiere" name="barbiere" required>
+                                <?php
+                                while ($row = mysqli_fetch_assoc($result)) { ?>
+                                    <option value='<?=$row['mail']?>'><?=$row['nome'] . $row['cognome']?></option>";
+                                <?php };?>
+                            </select>
+                        </td>
+                    </tr>
+                    <!--DATA E ORARI-->
                     <tr>
                         <td><label>Data e Ora</label></td>
                         <td>
                             <section id="date-time">
-                                <input type="date" name="date" required>
-                                <input type="time" name="time" required>
+                                <input type="date" id="date" name="date" required>
+                                <div id="slots-container">
+                                    <div id="slots"></div>
+                                </div>
+                                <input type="hidden" name="time" id="selected-time">
                             </section>
                         </td>
                     </tr>
@@ -153,7 +174,5 @@
     <footer>
         <p>&copy; 2025 Il Tuo Salone di Parrucchiere</p>
     </footer>
-
-    <script src="script.js"></script>
 </body>
 </html>

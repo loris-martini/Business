@@ -32,26 +32,25 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
 
     try{
         $stmt = mysqli_prepare($db_conn, $query);
-
         mysqli_stmt_bind_param($stmt, "s", $mail);
-
         mysqli_stmt_execute($stmt);
-
         $result = mysqli_stmt_get_result($stmt);
 
         if(mysqli_num_rows($result) > 0){
-            $user = mysqli_fetch_assoc($result);
-            $hashedPassword = $user['password'];
+            $percorso = "index.php";
+            $message = checkPassword($result, $password, $percorso);
+        }else{
+            $query = "SELECT * FROM barbieri WHERE mail = ?";
+            $stmt = mysqli_prepare($db_conn, $query);
+            mysqli_stmt_bind_param($stmt, "s", $mail);
+            mysqli_stmt_execute($stmt);
+            $result = mysqli_stmt_get_result($stmt);
 
-            if(password_verify($password, $hashedPassword)){
-                $_SESSION['user']['nome']       = $user['nome'];
-                $_SESSION['user']['cognome']    = $user['cognome'];
-                $_SESSION['user']['mail']       = $user['mail'];
-
-                header("Location: index.php");
-                exit();
+            if(mysqli_num_rows($result) > 0){
+                $percorso = "gestionale.php";
+                $message = checkPassword($result, $password, $percorso);
             }else{
-                $message = "Email o password non valide.";
+                $message = "Utente non trovato";
             }
         }
     }catch(Exception $ex){

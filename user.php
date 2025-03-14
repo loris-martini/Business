@@ -181,16 +181,6 @@ try {
         <form action="<?= htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST" onsubmit="return confirmDelete();">
             <input class="delete" type="submit" name="delete" value="Cancella Dati">
         </form>
-
-        <script>
-            function confirmLogout() {
-                return confirm("Sei sicuro di volerti sloggare?");
-            }
-
-            function confirmDelete() {
-                return confirm("Sei sicuro di voler cancellare i tuoi dati? Questa azione è irreversibile.");
-            }
-        </script>
     </section>
 
     <section id="contact">
@@ -202,7 +192,5 @@ try {
     <footer>
         <p>&copy; 2025 Il Tuo Salone di Parrucchiere</p>
     </footer>
-
-    <script src="script.js"></script>
 </body>
 </html>
