@@ -21,61 +21,104 @@ function successAlert() {
     return alert("Appuntamento prenotato con successo!");
 }
 
-//APPUNTAMENTO  
-document.getElementById("date").addEventListener("input", updateSlots);
-document.getElementById("barbiere").addEventListener("change", updateSlots);
+// Inizialmente nascondiamo gli elementi
+document.getElementById('service-container').style.display = 'none';
+document.getElementById('barbiere-container').style.display = 'none';
+document.getElementById('date-time').style.display = 'none';
+document.getElementById('slots-container').style.display = 'none';
 
-function updateSlots() {
-    let date = document.getElementById("date").value;
-    let barbiere = document.getElementById("barbiere").value;
-    let slotsContainer = document.getElementById("slots");
-
-    // Se la data è vuota, svuota il contenitore degli slot e interrompi la funzione
-    if (!date) {
-        slotsContainer.innerHTML = "";
-        return;
+// Mostra il servizio quando il salone viene selezionato
+document.getElementById('salone').addEventListener('change', function () {
+    const saloneId = this.value;
+    
+    if (saloneId) {
+        document.getElementById('service-container').style.display = 'block';
+        // Carica i servizi per il salone selezionato
+        fetch(`get_servizi.php?salone=${saloneId}`)
+            .then(response => response.json())
+            .then(data => {
+                const servizioSelect = document.getElementById('service');
+                servizioSelect.innerHTML = ''; // Pulisce le opzioni
+                data.forEach(servizio => {
+                    const option = document.createElement('option');
+                    option.value = servizio.id_servizio;
+                    option.textContent = servizio.nome;
+                    servizioSelect.appendChild(option);
+                });
+            });
+    } else {
+        document.getElementById('service-container').style.display = 'none';
+        document.getElementById('barbiere-container').style.display = 'none';
+        document.getElementById('date-time').style.display = 'none';
+        document.getElementById('slots-container').style.display = 'none';
     }
+});
 
-    if (!barbiere) return;
+// Mostra il barbiere quando il servizio viene selezionato
+document.getElementById('service').addEventListener('change', function () {
+    const servizioId = this.value;
+    
+    if (servizioId) {
+        document.getElementById('barbiere-container').style.display = 'block';
+        // Carica i barbieri per il servizio selezionato
+        fetch(`get_barbieri.php?servizio=${servizioId}`)
+            .then(response => response.json())
+            .then(data => {
+                const barbiereSelect = document.getElementById('barbiere');
+                barbiereSelect.innerHTML = ''; // Pulisce le opzioni
+                data.forEach(barbiere => {
+                    const option = document.createElement('option');
+                    option.value = barbiere.mail;
+                    option.textContent = `${barbiere.nome} ${barbiere.cognome}`;
+                    barbiereSelect.appendChild(option);
+                });
+            });
+    } else {
+        document.getElementById('barbiere-container').style.display = 'none';
+        document.getElementById('date-time').style.display = 'none';
+        document.getElementById('slots-container').style.display = 'none';
+    }
+});
 
-    fetch(`get_orari_disponibili.php?barbiere=${barbiere}&date=${date}`)
-        .then(response => response.json())
-        .then(data => {
-            slotsContainer.innerHTML = "";
+// Mostra la sezione della data quando il barbiere viene selezionato
+document.getElementById('barbiere').addEventListener('change', function () {
+    const barbiere = this.value;
 
-            let startTime = 9 * 60; // 9:00 AM in minuti
-            let endTime = 18 * 60; // 18:00 PM in minuti
+    if (barbiere) {
+        document.getElementById('date-time').style.display = 'block';
+    } else {
+        document.getElementById('date-time').style.display = 'none';
+        document.getElementById('slots-container').style.display = 'none';
+    }
+});
 
-            while (startTime < endTime) {
-                let hour = Math.floor(startTime / 60);
-                let minutes = startTime % 60;
-                let time = `${hour.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+// Carica gli orari disponibili per la data e il barbiere
+document.getElementById('date').addEventListener('change', function () {
+    const date = this.value;
+    const barbiere = document.getElementById('barbiere').value;
 
-                startTime += 30;
-                let nextHour = Math.floor(startTime / 60);
-                let nextMinutes = startTime % 60;
-                let nextTime = `${nextHour.toString().padStart(2, "0")}:${nextMinutes.toString().padStart(2, "0")}`;
+    if (date && barbiere) {
+        fetch(`get_orari_disponibili.php?barbiere=${barbiere}&data=${date}`)
+            .then(response => response.json())
+            .then(data => {
+                const slotsContainer = document.getElementById('slots');
+                slotsContainer.innerHTML = ''; // Pulisce gli slot
 
-                let isAvailable = !data.includes(time);
+                data.forEach(slot => {
+                    const button = document.createElement('button');
+                    button.classList.add(slot.available ? 'available' : 'unavailable');
+                    button.textContent = slot.time;
+                    button.disabled = !slot.available;
+                    button.onclick = function () {
+                        document.getElementById('selected-time').value = slot.time;
+                    };
 
-                let button = document.createElement("button");
-                button.type = "button";
-                button.textContent = `${time} - ${nextTime}`;
-                button.value = time;
-                button.classList.add("slot");
-                if (!isAvailable) {
-                    button.disabled = true;
-                    button.classList.add("unavailable");
-                }
-
-                button.addEventListener("click", function () {
-                    document.querySelectorAll(".slot").forEach(b => b.classList.remove("selected"));
-                    button.classList.add("selected");
-                    document.getElementById("selected-time").value = time;
+                    slotsContainer.appendChild(button);
                 });
 
-                slotsContainer.appendChild(button);
-            }
-        })
-        .catch(error => console.error("Errore nel recupero degli orari:", error));
-}
+                document.getElementById('slots-container').style.display = 'block';
+            });
+    } else {
+        document.getElementById('slots-container').style.display = 'none';
+    }
+});
