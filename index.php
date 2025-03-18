@@ -12,7 +12,7 @@
         $query = "SELECT mail, nome, cognome FROM barbieri";
         $resultBarbieri = mysqli_query($db_conn, $query);
 
-        $query = "SELECT indirizzo, nome FROM saloni";
+        $query = "SELECT id_salone, indirizzo, nome FROM saloni";
         $resultSaloni = mysqli_query($db_conn, $query);
 
         if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
@@ -110,39 +110,35 @@
                         <td><label class="form-label title">Scegli il Salone</label></td>
                         <td>
                             <select id="salone" name="salone" required>
-                                <option value="">Seleziona un barbiere</option>
+                                <option value="">Seleziona un salone</option>
                                 <?php
                                 while ($row = mysqli_fetch_assoc($resultSaloni)) { ?>
-                                    <option value='<?=$row['indirizzo']?>'><?=$row['nome']?>: (<?=$row['indirizzo']?>)</option>
+                                    <option value='<?=$row['id_salone']?>'><?=$row['nome']?>: (<?=$row['indirizzo']?>)</option>
                                 <?php };?>
                             </select>
                         </td>
                     </tr>
                     <!--SERVIZIO-->
-                    <tr id="service-container" style="display:none;">
+                    <tr id="service-container">
                         <td><label class="form-label title">Servizio</label></td>
                         <td>
-                            <select id="service" name="service" required>
-                                <option value="">Seleziona un servizio</option>
-                            </select>
+                            <select id="service" name="service" required></select>
                         </td>
                     </tr>
                     <!--BARBIERE-->
-                    <tr id="barbiere-container" style="display:none;">
+                    <tr id="barbiere-container">
                         <td><label class="form-label title">Scegli il barbiere</label></td>
                         <td>
-                            <select id="barbiere" name="barbiere" required>
-                                <option value="">Seleziona un barbiere</option>
-                            </select>
+                            <select id="barbiere" name="barbiere" required></select>
                         </td>
                     </tr>
                     <!--DATA E ORARI-->
-                    <tr id="date-time" style="display:none;">
+                    <tr id="date-time">
                         <td><label>Data e Ora</label></td>
                         <td>
                             <section id="date-time">
                                 <input type="date" id="date" name="date" required>
-                                <div id="slots-container" style="display:none;">
+                                <div id="slots-container">
                                     <div id="slots"></div>
                                 </div>
                                 <input type="hidden" id="selected-time" name="time">

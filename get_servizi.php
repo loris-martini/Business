@@ -3,10 +3,10 @@ include 'connessione.php';
 include 'funzioni.php';
 
 if (isset($_GET['salone'])) {
-    $salone = mysqli_real_escape_string($db_conn, filtro_testo($_GET['salone']));
+    $salone = @mysqli_real_escape_string($db_conn, filtro_testo($_GET['salone']));
     
     // Recupera i servizi per il salone specificato tramite la tabella "propone"
-    $query = "SELECT s.id_servizio, s.nome 
+    $query = "SELECT s.id_servizio, s.nome, s.durata
               FROM servizi s
               JOIN propone p ON s.id_servizio = p.fk_servizio
               WHERE p.fk_salone = ?";

@@ -32,13 +32,13 @@ document.getElementById('salone').addEventListener('change', function () {
     const saloneId = this.value;
     
     if (saloneId) {
-        document.getElementById('service-container').style.display = 'block';
+        document.getElementById('service-container').style.display = 'table-row';
         // Carica i servizi per il salone selezionato
         fetch(`get_servizi.php?salone=${saloneId}`)
             .then(response => response.json())
             .then(data => {
                 const servizioSelect = document.getElementById('service');
-                servizioSelect.innerHTML = ''; // Pulisce le opzioni
+                servizioSelect.innerHTML = '<option value="">Seleziona un servizio</option>';
                 data.forEach(servizio => {
                     const option = document.createElement('option');
                     option.value = servizio.id_servizio;
@@ -59,13 +59,13 @@ document.getElementById('service').addEventListener('change', function () {
     const servizioId = this.value;
     
     if (servizioId) {
-        document.getElementById('barbiere-container').style.display = 'block';
+        document.getElementById('barbiere-container').style.display = 'table-row';
         // Carica i barbieri per il servizio selezionato
         fetch(`get_barbieri.php?servizio=${servizioId}`)
             .then(response => response.json())
             .then(data => {
                 const barbiereSelect = document.getElementById('barbiere');
-                barbiereSelect.innerHTML = ''; // Pulisce le opzioni
+                barbiereSelect.innerHTML = '<option value="">Seleziona un barbiere</option>';
                 data.forEach(barbiere => {
                     const option = document.createElement('option');
                     option.value = barbiere.mail;
@@ -85,7 +85,7 @@ document.getElementById('barbiere').addEventListener('change', function () {
     const barbiere = this.value;
 
     if (barbiere) {
-        document.getElementById('date-time').style.display = 'block';
+        document.getElementById('date-time').style.display = 'table-row';
     } else {
         document.getElementById('date-time').style.display = 'none';
         document.getElementById('slots-container').style.display = 'none';
