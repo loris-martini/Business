@@ -2,6 +2,7 @@ DROP DATABASE IF EXISTS my_salone;
 CREATE DATABASE my_salone DEFAULT CHARACTER SET = utf8;
 USE my_salone;
 
+-- Tabella Clienti
 CREATE TABLE clienti (
     mail                        VARCHAR(100)        NOT NULL UNIQUE, /*PK*/
     nome                        VARCHAR(50)         NOT NULL,
@@ -14,16 +15,19 @@ CREATE TABLE clienti (
     PRIMARY KEY(mail)
 ) ENGINE = InnoDB;
 
+-- Tabella Saloni
 CREATE TABLE saloni (
     id_salone                   INT AUTO_INCREMENT, /*PK*/
     nome                        VARCHAR(50)         NOT NULL,
     indirizzo                   VARCHAR(100)        NOT NULL UNIQUE,
     posti                       INT                 NOT NULL,
-    orario_apertura             TIME                NOT NULL,
-    orario_chiusura             TIME                NOT NULL,
+    posti_disponibili           INT                 NOT NULL,
+    orario_apertura             TIME                NOT NULL, 
+    orario_chiusura             TIME                NOT NULL, 
     PRIMARY KEY(id_salone)
 ) ENGINE = InnoDB;
 
+-- Tabella Barbieri
 CREATE TABLE barbieri (
     mail                        VARCHAR(100)        NOT NULL UNIQUE, /*PK*/
     nome                        VARCHAR(50)         NOT NULL,
@@ -36,7 +40,7 @@ CREATE TABLE barbieri (
     PRIMARY KEY(mail)
 ) ENGINE = InnoDB;
 
-/* Relazione tra barbieri e saloni */
+-- Relazione Barbieri-Salone (Un barbiere può lavorare in più saloni)
 CREATE TABLE lavora (
     fk_barbiere                 VARCHAR(100)        NOT NULL, /* FK */
     fk_salone                   INT                 NOT NULL, /* FK */
@@ -49,14 +53,16 @@ CREATE TABLE lavora (
         ON DELETE CASCADE
 ) ENGINE = InnoDB;
 
+-- Tabella Servizi
 CREATE TABLE servizi (
     id_servizio                 INT AUTO_INCREMENT, /*PK*/
     nome                        VARCHAR(50)         NOT NULL UNIQUE,
     durata                      INT                 NOT NULL, /* Durata in minuti */
+    prezzo                      DECIMAL(10,2)       NOT NULL DEFAULT 0.00, /* Nuovo */
     PRIMARY KEY(id_servizio)
 ) ENGINE = InnoDB;
 
-/* Relazione tra saloni e servizi offerti */
+-- Relazione Salone-Servizio
 CREATE TABLE salone_servizio (
     fk_salone                 INT                 NOT NULL, /* FK */
     fk_servizio               INT                 NOT NULL, /* FK */
@@ -69,7 +75,7 @@ CREATE TABLE salone_servizio (
         ON DELETE CASCADE
 ) ENGINE = InnoDB;
 
-/* Relazione tra barbieri e servizi che offrono */
+-- Relazione Barbiere-Servizio
 CREATE TABLE barbiere_servizio (
     fk_barbiere                 VARCHAR(100)        NOT NULL, /* FK */
     fk_servizio                 INT                 NOT NULL, /* FK */
@@ -82,32 +88,33 @@ CREATE TABLE barbiere_servizio (
         ON DELETE CASCADE
 ) ENGINE = InnoDB;
 
-/* ORARI DI LAVORO DEI BARBIERI */
+-- Tabella Turni Barbieri (per sapere dove e quando lavora un barbiere)
 CREATE TABLE turni_barbieri (
-    id_turno                    INT AUTO_INCREMENT, /*PK*/
-    fk_barbiere                 VARCHAR(100)        NOT NULL,
-    fk_salone                   INT                 NOT NULL,
-    giorno                      ENUM("Lu","Ma","Me","Gi","Ve","Sa","Do") NOT NULL,
-    ora_inizio                  TIME                NOT NULL,
-    ora_fine                    TIME                NOT NULL,
+    id_turno        BIGINT AUTO_INCREMENT, /*PK*/
+    fk_barbiere     VARCHAR(100) NOT NULL, /* FK */
+    fk_salone       INT NOT NULL, /* FK */
+    giorno          ENUM("Lu","Ma","Me","Gi","Ve","Sa","Do") NOT NULL,
+    ora_inizio      TIME NOT NULL,
+    ora_fine        TIME NOT NULL,
     PRIMARY KEY(id_turno),
-    FOREIGN KEY(fk_barbiere)    REFERENCES barbieri(mail)
-        ON UPDATE CASCADE
-        ON DELETE CASCADE,
-    FOREIGN KEY(fk_salone)      REFERENCES saloni(id_salone)
-        ON UPDATE CASCADE
+    FOREIGN KEY(fk_barbiere) REFERENCES barbieri(mail)
         ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY(fk_salone) REFERENCES saloni(id_salone)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
-/* APPUNTAMENTI */
+-- Tabella Appuntamenti
 CREATE TABLE appuntamenti (
     id_appuntamento             BIGINT AUTO_INCREMENT, /*PK*/
     fk_cliente                  VARCHAR(100)        NOT NULL,
-    fk_turno                    INT                 NOT NULL,
+    fk_turno                    BIGINT              NOT NULL, /* FK - Nuovo */
     fk_servizio                 INT                 NOT NULL,
     data_app                    DATE                NOT NULL,
     ora_inizio                  TIME                NOT NULL,
     ora_fine                    TIME,
+    stato                       ENUM('IN_ATTESA', 'CONFERMATO', 'COMPLETATO', 'CANCELLATO') DEFAULT 'IN_ATTESA', /* Nuovo */
     PRIMARY KEY(id_appuntamento),
     FOREIGN KEY(fk_cliente)     REFERENCES clienti(mail)
         ON UPDATE CASCADE
