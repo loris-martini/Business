@@ -8,8 +8,8 @@ if (isset($_GET['salone'])) {
     // Recupera i servizi per il salone specificato tramite la tabella "propone"
     $query = "SELECT s.id_servizio, s.nome, s.durata
               FROM servizi s
-              JOIN propone p ON s.id_servizio = p.fk_servizio
-              WHERE p.fk_salone = ?";
+              JOIN salone_servizio ss ON s.id_servizio = ss.fk_servizio
+              WHERE ss.fk_salone = ?";
     
     $stmt = mysqli_prepare($db_conn, $query);
     mysqli_stmt_bind_param($stmt, 's', $salone);

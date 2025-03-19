@@ -21,7 +21,6 @@ CREATE TABLE saloni (
     nome                        VARCHAR(50)         NOT NULL,
     indirizzo                   VARCHAR(100)        NOT NULL UNIQUE,
     posti                       INT                 NOT NULL,
-    posti_disponibili           INT                 NOT NULL,
     orario_apertura             TIME                NOT NULL, 
     orario_chiusura             TIME                NOT NULL, 
     PRIMARY KEY(id_salone)
@@ -93,7 +92,7 @@ CREATE TABLE turni_barbieri (
     id_turno        BIGINT AUTO_INCREMENT, /*PK*/
     fk_barbiere     VARCHAR(100) NOT NULL, /* FK */
     fk_salone       INT NOT NULL, /* FK */
-    giorno          ENUM("Lu","Ma","Me","Gi","Ve","Sa","Do") NOT NULL,
+    giorno          ENUM("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday") NOT NULL,
     ora_inizio      TIME NOT NULL,
     ora_fine        TIME NOT NULL,
     PRIMARY KEY(id_turno),
@@ -108,21 +107,20 @@ CREATE TABLE turni_barbieri (
 -- Tabella Appuntamenti
 CREATE TABLE appuntamenti (
     id_appuntamento             BIGINT AUTO_INCREMENT, /*PK*/
-    fk_cliente                  VARCHAR(100)        NOT NULL,
-    fk_turno                    BIGINT              NOT NULL, /* FK - Nuovo */
-    fk_servizio                 INT                 NOT NULL,
+    fk_cliente                  VARCHAR(100),
+    fk_turno                    BIGINT, /* FK - Nuovo */
+    fk_servizio                 INT,
     data_app                    DATE                NOT NULL,
     ora_inizio                  TIME                NOT NULL,
-    ora_fine                    TIME,
     stato                       ENUM('IN_ATTESA', 'CONFERMATO', 'COMPLETATO', 'CANCELLATO') DEFAULT 'IN_ATTESA', /* Nuovo */
     PRIMARY KEY(id_appuntamento),
     FOREIGN KEY(fk_cliente)     REFERENCES clienti(mail)
         ON UPDATE CASCADE
-        ON DELETE CASCADE,
+        ON DELETE SET NULL,
     FOREIGN KEY(fk_turno)       REFERENCES turni_barbieri(id_turno)
         ON UPDATE CASCADE
-        ON DELETE CASCADE,
+        ON DELETE SET NULL,
     FOREIGN KEY(fk_servizio)    REFERENCES servizi(id_servizio)
         ON UPDATE CASCADE
-        ON DELETE CASCADE
+        ON DELETE SET NULL
 ) ENGINE = InnoDB;

@@ -8,10 +8,6 @@
         $servizio = $date = $time = $message = '';
         $isFormValid = true;
 
-        // Recupero barbieri e saloni per il form
-        $query = "SELECT mail, nome, cognome FROM barbieri";
-        $resultBarbieri = mysqli_query($db_conn, $query);
-
         $query = "SELECT id_salone, indirizzo, nome FROM saloni";
         $resultSaloni = mysqli_query($db_conn, $query);
 

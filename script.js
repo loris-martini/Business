@@ -96,27 +96,42 @@ document.getElementById('barbiere').addEventListener('change', function () {
 document.getElementById('date').addEventListener('change', function () {
     const date = this.value;
     const barbiere = document.getElementById('barbiere').value;
+    const service = document.getElementById('service').value;
 
-    if (date && barbiere) {
-        fetch(`get_orari_disponibili.php?barbiere=${barbiere}&data=${date}`)
+    if (date && barbiere && service) {
+        fetch(`get_orari_disponibili.php?barbiere=${barbiere}&data=${date}&service=${service}`)
             .then(response => response.json())
             .then(data => {
                 const slotsContainer = document.getElementById('slots');
                 slotsContainer.innerHTML = ''; // Pulisce gli slot
 
-                data.forEach(slot => {
-                    const button = document.createElement('button');
-                    button.classList.add(slot.available ? 'available' : 'unavailable');
-                    button.textContent = slot.time;
-                    button.disabled = !slot.available;
-                    button.onclick = function () {
-                        document.getElementById('selected-time').value = slot.time;
-                    };
+                // Se non ci sono slot disponibili
+                if (data.length === 0) {
+                    const noAvailableMessage = document.createElement('p');
+                    noAvailableMessage.textContent = 'No available slots for this date and service.';
+                    slotsContainer.appendChild(noAvailableMessage);
+                } else {
+                    // Aggiungi i pulsanti per gli slot disponibili
+                    data.forEach(slot => {
+                        const button = document.createElement('button');
+                        button.classList.add(slot.available ? 'available' : 'unavailable');
+                        button.textContent = `${slot.start} - ${slot.end}`;
+                        button.disabled = !slot.available;
+                        button.onclick = function () {
+                            // Imposta l'orario selezionato
+                            document.getElementById('selected-time').value = `${slot.start} - ${slot.end}`;
+                        };
 
-                    slotsContainer.appendChild(button);
-                });
+                        slotsContainer.appendChild(button);
+                    });
+                }
 
+                // Mostra la sezione degli slot
                 document.getElementById('slots-container').style.display = 'block';
+            })
+            .catch(error => {
+                //console.error('Error fetching available slots:', error);
+                alert('Something went wrong. Please try again later.');
             });
     } else {
         document.getElementById('slots-container').style.display = 'none';
