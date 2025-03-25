@@ -12,24 +12,21 @@
         $resultSaloni = mysqli_query($db_conn, $query);
 
         if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
-            $date = filtro_testo($_POST['date']);
-            $time = filtro_testo($_POST['time']);
-            $barbiere = filtro_testo($_POST['barbiere']);
+            $date =         @mysqli_real_escape_string($db_conn, filtro_testo($_POST['date']));
+            $time =         @mysqli_real_escape_string($db_conn, filtro_testo($_POST['time']));
+            $barbiere =     @mysqli_real_escape_string($db_conn, filtro_testo($_POST['barbiere']));
+            $servizio =     @mysqli_real_escape_string($db_conn, ucwords(strtolower(filtro_testo($_POST['service']))));
+            $salone =       @mysqli_real_escape_string($db_conn, filtro_testo($_POST['salone']));
 
-            if(empty($date) || empty($time)){
-                $isFormValid = false;
+            if(empty($date) || empty($time) || empty($barbiere) || empty($servizio) || empty($salone)){
                 $message = "Tutti i campi sono obbligatori.";
             }else{
-                $date = @mysqli_real_escape_string($db_conn, filtro_testo($_POST['date']));
-                $time = @mysqli_real_escape_string($db_conn, filtro_testo($_POST['time']));
-                $servizio = @mysqli_real_escape_string($db_conn, ucwords(strtolower(filtro_testo($_POST['service']))));
-
-                $query = "INSERT INTO appuntamenti (servizio, data_app, ora_inizio, fk_cliente, fk_barbiere, fk_salone) VALUES (?, ?, ?, ?, ?, ?)";
+                $query = "INSERT INTO appuntamenti (fk_cliente, fk_turno, fk_servizio, data_app, ora_inizio, stato) VALUES (?, ?, ?, ?, ?, ?)";
 
                 try{
                     $stmt = mysqli_prepare($db_conn, $query);
 
-                    mysqli_stmt_bind_param($stmt, "ssssss", $servizio, $date, $time, $_SESSION['user']['mail'], $barbiere, $_POST['salone']);
+                    mysqli_stmt_bind_param($stmt, "ssssss", $_SESSION['user']['mail'], );
 
                     if(mysqli_stmt_execute($stmt)){
                         $message = "Appuntamento prenotato con successo!";
@@ -135,7 +132,7 @@
                             <section id="date-time">
                                 <input type="date" id="date" name="date" required>
                                 <div id="slots-container">
-                                    <div id="slots"></div>
+                                    <select id="slots" required></select>
                                 </div>
                                 <input type="hidden" id="selected-time" name="time">
                             </section>
