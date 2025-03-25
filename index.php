@@ -5,8 +5,7 @@
     session_start();
 
     if(isset($_SESSION['user'])){
-        $servizio = $date = $time = $message = '';
-        $isFormValid = true;
+        $date = $time = $barbiere = $servizio = $salone = $message = '';
 
         $query = "SELECT id_salone, indirizzo, nome FROM saloni";
         $resultSaloni = mysqli_query($db_conn, $query);
@@ -14,26 +13,49 @@
         if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
             $date =         @mysqli_real_escape_string($db_conn, filtro_testo($_POST['date']));
             $time =         @mysqli_real_escape_string($db_conn, filtro_testo($_POST['time']));
+            $time =         $time . ":00";
             $barbiere =     @mysqli_real_escape_string($db_conn, filtro_testo($_POST['barbiere']));
             $servizio =     @mysqli_real_escape_string($db_conn, ucwords(strtolower(filtro_testo($_POST['service']))));
             $salone =       @mysqli_real_escape_string($db_conn, filtro_testo($_POST['salone']));
 
-            if(empty($date) || empty($time) || empty($barbiere) || empty($servizio) || empty($salone)){
-                $message = "Tutti i campi sono obbligatori.";
+            if(empty($date) || empty($time) || empty($barbiere) || empty($servizio) || empty($salone) || empty($_SESSION['user']['mail'])){
+                if(empty($_SESSION['user']['mail'])){
+                    $message = "Utente non autenticato";
+                }else{
+                    $message = "Tutti i campi sono obbligatori.";
+                }
             }else{
-                $query = "INSERT INTO appuntamenti (fk_cliente, fk_turno, fk_servizio, data_app, ora_inizio, stato) VALUES (?, ?, ?, ?, ?, ?)";
-
                 try{
+                    mysqli_begin_transaction($db_conn);
+                    $query = "SELECT id_turno FROM turni_barbieri WHERE fk_barbiere = ?";
                     $stmt = mysqli_prepare($db_conn, $query);
+                    mysqli_stmt_bind_param($stmt, "s", $barbiere);
+                    mysqli_stmt_execute($stmt);
+                    $result = mysqli_stmt_get_result($stmt);
+                    if($result && $row = mysqli_fetch_assoc($result)){
+                        $idTurno = $row['id_turno'];
+                        $stato = 'CONFERMATO';
 
-                    mysqli_stmt_bind_param($stmt, "ssssss", $_SESSION['user']['mail'], );
+                        $query = "INSERT INTO appuntamenti (fk_cliente, fk_turno, fk_servizio, data_app, ora_inizio, stato) VALUES (?, ?, ?, ?, ?, ?)";
+                        $stmt = mysqli_prepare($db_conn, $query);
+                        mysqli_stmt_bind_param($stmt, "sissss", $_SESSION['user']['mail'], $idTurno, $servizio, $date, $time, $stato);
 
-                    if(mysqli_stmt_execute($stmt)){
-                        $message = "Appuntamento prenotato con successo!";
-                        $servizio = $date = $time = '';
+                        if(mysqli_stmt_execute($stmt)){
+                            mysqli_commit($db_conn);
+                            $_SESSION['success'] = "Appuntamento prenotato con successo!";
+                            header("Location: ".$_SERVER['PHP_SELF']);
+                            exit();
+                        }else{
+                            mysqli_rollback($db_conn);
+                            $message = "Errore durante l'inserimento";
+                        }
+                    }else{
+                        mysqli_rollback($db_conn);
+                        $message = "barbiere non trovato";
                     }
                 } catch (Exception $ex) {
-                    $message = mysqli_error($db_conn);
+                    mysqli_rollback($db_conn);
+                    $message = "Errore SQL: " . $ex->getMessage();
                 }
             }
         }
@@ -141,7 +163,11 @@
                     <!--ALTRO-->
                     <tr>
                         <td colspan="2">
-                            <span class="text-danger"><?= $message; ?></span>
+                            <?php if(empty($message)){ ?>
+                                <span><?=isset($_SESSION['success']) ? $_SESSION['success'] : ''?></span>
+                            <?php }else{ ?>
+                                <span class="text-danger"><?=$message?></span>
+                            <?php }; ?>
                         </td>
                     </tr>
                     <tr>

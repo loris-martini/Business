@@ -135,7 +135,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             data.forEach(slot => {
                                 if (slot.available) {
                                     const option = document.createElement("option");
-                                    option.value = `${slot.start} - ${slot.end}`;
+                                    option.value = `${slot.start}`;
                                     option.textContent = `${slot.start} - ${slot.end}`;
                                     slotsSelect.appendChild(option);
                                 }
