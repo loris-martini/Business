@@ -28,7 +28,7 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
     $mail =         @mysqli_real_escape_string($db_conn, strtolower(filtro_testo($_POST['mail'])));
     $password =     @mysqli_real_escape_string($db_conn, filtro_testo($_POST['password']));
 
-    $query = "SELECT * FROM clienti WHERE mail = ?";
+    $query = "SELECT * FROM utenti WHERE mail = ?";
 
     try{
         $stmt = mysqli_prepare($db_conn, $query);
@@ -37,21 +37,9 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
         $result = mysqli_stmt_get_result($stmt);
 
         if(mysqli_num_rows($result) > 0){
-            $percorso = "index.php";
-            $message = checkPassword($result, $password, $percorso);
+            $message = checkPassword($result, $password);
         }else{
-            $query = "SELECT * FROM barbieri WHERE mail = ?";
-            $stmt = mysqli_prepare($db_conn, $query);
-            mysqli_stmt_bind_param($stmt, "s", $mail);
-            mysqli_stmt_execute($stmt);
-            $result = mysqli_stmt_get_result($stmt);
-
-            if(mysqli_num_rows($result) > 0){
-                $percorso = "gestionale.php";
-                $message = checkPassword($result, $password, $percorso);
-            }else{
-                $message = "Utente non trovato";
-            }
+            $message = "Utente non trovato";   
         }
     }catch(Exception $ex){
         $message = mysqli_error($db_conn);

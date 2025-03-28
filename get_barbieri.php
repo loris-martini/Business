@@ -6,9 +6,9 @@ if (isset($_GET['servizio'])) {
     $servizio = mysqli_real_escape_string($db_conn, filtro_testo($_GET['servizio']));
     
     // Recupera i barbieri che offrono il servizio specificato
-    $query = "SELECT b.mail, b.nome, b.cognome 
-              FROM barbieri b
-              JOIN barbiere_servizio bs ON b.mail = bs.fk_barbiere
+    $query = "SELECT u.mail, u.nome, u.cognome 
+              FROM utentu u
+              JOIN barbiere_servizio bs ON u.mail = bs.fk_barbiere
               WHERE bs.fk_servizio = ?";
 
     $stmt = mysqli_prepare($db_conn, $query);

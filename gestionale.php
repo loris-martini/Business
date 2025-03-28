@@ -4,43 +4,32 @@
 
     session_start();
 
-    if(isset($_SESSION['user'])){
-        $servizio = $date = $time = $message = '';
-        $isFormValid = true;
-
-        $query = "SELECT mail, nome, cognome FROM barbieri";
-        $result = mysqli_query($db_conn, $query);
-
-        if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
-            $date = filtro_testo($_POST['date']);   
-            $time = filtro_testo($_POST['time']);
-
-            if(empty($date) || empty($time)){
-                $isFormValid = false;
-                $message = "Tutti i campi sono obbligatori.";
-            }else{
-                $date       = @mysqli_real_escape_string($db_conn, filtro_testo($_POST['date']));
-                $time       = @mysqli_real_escape_string($db_conn, filtro_testo($_POST['time']));
-                $servizio   = @mysqli_real_escape_string($db_conn, ucwords(strtolower(filtro_testo($_POST['service']))));
-
-                $query = "INSERT INTO appuntamenti (servizio, data_app, ora_inizio, fk_cliente) VALUES (?, ?, ?, ?)";
-
-                try{
-                    $stmt = mysqli_prepare($db_conn, $query);
-
-                    mysqli_stmt_bind_param($stmt, "ssss", $servizio, $date, $time, $_SESSION['user']['mail']);
-
-                    if(mysqli_stmt_execute($stmt)){
-                        $message = "Appuntamento prenotato con successo!";
-                        $servizio = $date = $time = '';
-                    }
-                }catch(Exception $ex){
-                    $message = mysqli_error($db_conn);
-                }
-            }
-        }
+    if (!isset($_SESSION['user'])) {
+        header("Location: login.php");
+        exit();
     }
-    
+
+    $query = "SELECT ruolo FROM utenti WHERE mail = ?";
+    $stmt = mysqli_prepare($db_conn, $query);
+    mysqli_stmt_bind_param($stmt, "s", $_SESSION['user']['mail']);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $user = mysqli_fetch_assoc($result);
+
+    if($user['ruolo'] != 'BARBIERE'){
+        header("Location: login.php");
+        exit();
+    }
+
+    $query = "SELECT * 
+        FROM appuntamenti a JOIN turni_barbieri t ON a.fk_turno = t.id_turno 
+        WHERE t.fk_barbiere = ?";
+        
+    $stmt = mysqli_prepare($db_conn, $query);
+    mysqli_stmt_bind_param($stmt, "s", $_SESSION['user']['mail']);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $user = mysqli_fetch_assoc($result);    
 ?>
 
 <!DOCTYPE html>

@@ -92,7 +92,7 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
             $valori[':data_nascita'] = $data;
         }
 
-        $query = "INSERT INTO clienti (" . implode(", ", $campi) . ") VALUES (" . implode(", ", $segnaposti) . ")";
+        $query = "INSERT INTO utenti (" . implode(", ", $campi) . ") VALUES (" . implode(", ", $segnaposti) . ")";
 
         $stmt = mysqli_prepare($db_conn, $query);
 

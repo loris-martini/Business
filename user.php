@@ -11,7 +11,7 @@ if (!isset($_SESSION['user'])) {
 
 $message = '';
 try {
-    $query = "SELECT nome, cognome, mail, numero_telefono, genere, residenza, data_nascita FROM clienti WHERE mail = ?";
+    $query = "SELECT * FROM utenti WHERE mail = ?";
     $stmt = mysqli_prepare($db_conn, $query);
     mysqli_stmt_bind_param($stmt, "s", $_SESSION['user']['mail']);
     mysqli_stmt_execute($stmt);
@@ -19,6 +19,8 @@ try {
 
     if (mysqli_num_rows($result) > 0) {
         $user = mysqli_fetch_assoc($result);
+    }else{
+        $message = "Utente non trovato!";
     }
 
     if (isset($_POST['update']) && $_SERVER["REQUEST_METHOD"] == "POST") {
@@ -62,7 +64,7 @@ try {
         }
 
         if (count($campi) > 0) {
-            $query = "UPDATE clienti SET " . implode(", ", $campi) . " WHERE mail = ?";
+            $query = "UPDATE utenti SET " . implode(", ", $campi) . " WHERE mail = ?";
             $stmt = mysqli_prepare($db_conn, $query);
             $types = str_repeat('s', count($valori)) . 's';
             $params = array_merge($valori, [$_SESSION['user']['mail']]);
@@ -93,7 +95,7 @@ try {
 
     // Cancellazione dei dati dell'utente
     if (isset($_POST['delete']) && $_SERVER["REQUEST_METHOD"] == "POST") {
-        $query = "DELETE FROM clienti WHERE mail = ?";
+        $query = "DELETE FROM utenti WHERE mail = ?";
         $stmt = mysqli_prepare($db_conn, $query);
         mysqli_stmt_bind_param($stmt, "s", $_SESSION['user']['mail']);
         mysqli_stmt_execute($stmt);
@@ -102,7 +104,7 @@ try {
         header("Location: index.php");    
     }
 } catch (Exception $ex) {
-    $message = mysqli_error($db_conn);
+    $message = "Errore SQL: " . mysqli_error($db_conn);
 }
 ?>
 
@@ -135,19 +137,19 @@ try {
             <table>
                 <tr>
                     <td>Nome</td>
-                    <td><input type="text" name="nome" value="<?= htmlspecialchars($user['nome']); ?>"></td>
+                    <td><input type="text" name="nome" value="<?=isset($user['nome']) ? htmlspecialchars($user['nome']) : ""?>"></td>
                 </tr>
                 <tr>
                     <td>Cognome</td>
-                    <td><input type="text" name="cognome" value="<?= htmlspecialchars($user['cognome']); ?>"></td>
+                    <td><input type="text" name="cognome" value="<?=isset($user['cognome']) ? htmlspecialchars($user['cognome']) : ""?>"></td>
                 </tr>
                 <tr>
                     <td>Mail</td>
-                    <td><input type="text" name="mail" value="<?= htmlspecialchars($user['mail']); ?>" readonly></td>
+                    <td><input type="text" name="mail" value="<?=isset($user['mail']) ? htmlspecialchars($user['mail']) : ""?>" readonly></td>
                 </tr>
                 <tr>
                     <td>Telefono</td>
-                    <td><input type="text" name="telefono" value="<?= htmlspecialchars($user['numero_telefono']); ?>"></td>
+                    <td><input type="text" name="telefono" value="<?=isset($user['numero_telefono']) ? htmlspecialchars($user['numero_telefono']) : ""?>"></td>
                 </tr>
                 <tr>
                     <td>Genere</td>
@@ -159,11 +161,11 @@ try {
                 </tr>
                 <tr>
                     <td>Indirizzo</td>
-                    <td><input type="text" name="residenza" value="<?= htmlspecialchars($user['residenza']); ?>"></td>
+                    <td><input type="text" name="residenza" value="<?=isset($user['residenza']) ? htmlspecialchars($user['residenza']) : ""?>"></td>
                 </tr>
                 <tr>
                     <td>Data di Nascita</td>
-                    <td><input type="date" name="data_nascita" value="<?= htmlspecialchars($user['data_nascita']); ?>"></td>
+                    <td><input type="date" name="data_nascita" value="<?=isset($user['data_nascita']) ? htmlspecialchars($user['data_nascita']) : ""?>"></td>
                 </tr>
             </table>
 

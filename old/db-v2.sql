@@ -2,18 +2,16 @@ DROP DATABASE IF EXISTS my_salone;
 CREATE DATABASE my_salone DEFAULT CHARACTER SET = utf8;
 USE my_salone;
 
--- Tabella Utenti
-CREATE TABLE utenti (
+-- Tabella Clienti
+CREATE TABLE clienti (
     mail                        VARCHAR(100)        NOT NULL UNIQUE, /*PK*/
     nome                        VARCHAR(50)         NOT NULL,
     cognome                     VARCHAR(50)         NOT NULL,
-    password                    VARCHAR(255)        NOT NULL,
+    password                    CHAR(60)            NOT NULL,
     numero_telefono             CHAR(10)            NOT NULL,
     genere                      ENUM('M', 'F', 'Altro'),
     residenza                   VARCHAR(100),       
     data_nascita                DATE,  
-    ruolo                       ENUM('CLIENTE', 'BARBIERE', 'ADMIN') DEFAULT 'CLIENTE' NOT NULL,
-    CHECK (ruolo IN ('CLIENTE', 'BARBIERE', 'ADMIN')),
     PRIMARY KEY(mail)
 ) ENGINE = InnoDB;
 
@@ -28,12 +26,25 @@ CREATE TABLE saloni (
     PRIMARY KEY(id_salone)
 ) ENGINE = InnoDB;
 
+-- Tabella Barbieri
+CREATE TABLE barbieri (
+    mail                        VARCHAR(100)        NOT NULL UNIQUE, /*PK*/
+    nome                        VARCHAR(50)         NOT NULL,
+    cognome                     VARCHAR(50)         NOT NULL,
+    password                    CHAR(60)            NOT NULL,
+    numero_telefono             CHAR(10)            NOT NULL,
+    genere                      ENUM('M', 'F'),
+    residenza                   VARCHAR(100),       
+    data_nascita                DATE,  
+    PRIMARY KEY(mail)
+) ENGINE = InnoDB;
+
 -- Relazione Barbieri-Salone (Un barbiere può lavorare in più saloni)
-CREATE TABLE barbiere_salone (
+CREATE TABLE lavora (
     fk_barbiere                 VARCHAR(100)        NOT NULL, /* FK */
     fk_salone                   INT                 NOT NULL, /* FK */
     PRIMARY KEY(fk_barbiere, fk_salone),
-    FOREIGN KEY(fk_barbiere)    REFERENCES utenti(mail)
+    FOREIGN KEY(fk_barbiere)    REFERENCES barbieri(mail)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
     FOREIGN KEY(fk_salone)      REFERENCES saloni(id_salone)
@@ -68,7 +79,7 @@ CREATE TABLE barbiere_servizio (
     fk_barbiere                 VARCHAR(100)        NOT NULL, /* FK */
     fk_servizio                 INT                 NOT NULL, /* FK */
     PRIMARY KEY(fk_barbiere, fk_servizio),
-    FOREIGN KEY(fk_barbiere)    REFERENCES utenti(mail)
+    FOREIGN KEY(fk_barbiere)    REFERENCES barbieri(mail)
         ON UPDATE CASCADE
         ON DELETE CASCADE,
     FOREIGN KEY(fk_servizio)    REFERENCES servizi(id_servizio)
@@ -85,7 +96,7 @@ CREATE TABLE turni_barbieri (
     ora_inizio      TIME NOT NULL,
     ora_fine        TIME NOT NULL,
     PRIMARY KEY(id_turno),
-    FOREIGN KEY(fk_barbiere) REFERENCES utenti(mail)
+    FOREIGN KEY(fk_barbiere) REFERENCES barbieri(mail)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
     FOREIGN KEY(fk_salone) REFERENCES saloni(id_salone)
@@ -103,7 +114,7 @@ CREATE TABLE appuntamenti (
     ora_inizio                  TIME                NOT NULL,
     stato                       ENUM('IN_ATTESA', 'CONFERMATO', 'COMPLETATO', 'CANCELLATO') DEFAULT 'IN_ATTESA', /* Nuovo */
     PRIMARY KEY(id_appuntamento),
-    FOREIGN KEY(fk_cliente)     REFERENCES utenti(mail)
+    FOREIGN KEY(fk_cliente)     REFERENCES clienti(mail)
         ON UPDATE CASCADE
         ON DELETE SET NULL,
     FOREIGN KEY(fk_turno)       REFERENCES turni_barbieri(id_turno)
