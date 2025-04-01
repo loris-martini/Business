@@ -95,7 +95,11 @@ document.addEventListener("DOMContentLoaded", function () {
                             barbiereSelect.appendChild(option);
                         });
                     })
-                    .catch(error => console.error("Errore nel caricamento dei barbieri:", error));
+                    .catch(error => {
+                        barbiereSelect.innerHTML = `<option value="">Errore nel caricamento dei barbieri ${error}</option>`;
+                        console.log("Errore nel caricamento dei barbieri:", error)
+
+                    });
             } else {
                 barbiereContainer.style.display = "none";
                 dateTimeContainer.style.display = "none";

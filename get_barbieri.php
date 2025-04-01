@@ -7,9 +7,9 @@ if (isset($_GET['servizio'])) {
     
     // Recupera i barbieri che offrono il servizio specificato
     $query = "SELECT u.mail, u.nome, u.cognome 
-              FROM utentu u
+              FROM utenti u
               JOIN barbiere_servizio bs ON u.mail = bs.fk_barbiere
-              WHERE bs.fk_servizio = ?";
+              WHERE bs.fk_servizio = ? AND u.ruolo = 'BARBIERE'";
 
     $stmt = mysqli_prepare($db_conn, $query);
     mysqli_stmt_bind_param($stmt, 's', $servizio);

@@ -21,6 +21,8 @@
             $_SESSION['user']['nome']       = $user['nome'];
             $_SESSION['user']['cognome']    = $user['cognome'];
             $_SESSION['user']['mail']       = $user['mail'];
+            $_SESSION['user']['genere']     = $user['genere'];
+            $_SESSION['user']['ruolo']      = $user['ruolo'];
     
             header("Location: $percorso");
             return "";

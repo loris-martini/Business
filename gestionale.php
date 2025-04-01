@@ -17,7 +17,7 @@
     $user = mysqli_fetch_assoc($result);
 
     if($user['ruolo'] != 'BARBIERE'){
-        header("Location: login.php");
+        header("Location: index.php");
         exit();
     }
 
@@ -28,8 +28,7 @@
     $stmt = mysqli_prepare($db_conn, $query);
     mysqli_stmt_bind_param($stmt, "s", $_SESSION['user']['mail']);
     mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    $user = mysqli_fetch_assoc($result);    
+    $resultAppuntamenti = mysqli_stmt_get_result($stmt);    
 ?>
 
 <!DOCTYPE html>
@@ -51,7 +50,39 @@
         <div id="menu"></div>
     </header>
     <main>
+        <table class="appuntamenti">
+            <tr>
+                <td>Nome</td>
+                <td>Contatto</td>
+                <td>Servizio</td>
+                <td>Data</td>
+                <td>Ora</td>
+            </tr>    
+            <?php while($row = mysqli_fetch_assoc($resultAppuntamenti)){
+                $query = "SELECT * FROM utenti WHERE mail = ?";
+                $stmt = mysqli_prepare($db_conn, $query);
+                mysqli_stmt_bind_param($stmt, "s", $row['fk_cliente']);
+                mysqli_stmt_execute($stmt);
+                $result = mysqli_stmt_get_result($stmt);
+                $user = mysqli_fetch_assoc($result);
+                
+                $query = "SELECT nome, durata FROM servizi WHERE id_servizio = ?";
+                $stmt = mysqli_prepare($db_conn, $query);
+                mysqli_stmt_bind_param($stmt, "s", $row['fk_servizio']);
+                mysqli_stmt_execute($stmt);
+                $result = mysqli_stmt_get_result($stmt);
+                $servizio = mysqli_fetch_assoc($result);
+                ?>
+                <tr>
+                    <td><?=$user['nome']?> <?=$user['cognome']?></td>
+                    <td><?=$user['mail']?><br><?=$user['numero_telefono']?></td>
+                    <td><?=$servizio['nome']?></td>
+                    <td><?=$row['data_app']?></td>
+                    <td><?=$row['ora_inizio']?> - <?=date("H:i", strtotime($row['ora_inizio']) + ($servizio['durata']) * 60)?></td>
+                </tr>
+            <?php } ?>
 
+        </table>   
     </main>
     <section id="contact">
         <h2>Contattaci</h2>

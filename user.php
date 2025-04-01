@@ -128,7 +128,8 @@ try {
     <main>
 
     <section class="hero">
-        <h2>Benvenuto, <?= $user['nome'] . " " . $user['cognome']; ?>!</h2>
+    <h2><?php if($_SESSION['user']['genere'] == "M"){?>Benvenuto,<?php }else if($_SESSION['user']['genere'] == "F"){?> Benvenuta, <?php }else{ ?> Benvenut* <?php };
+            if($_SESSION['user']['ruolo'] == 'BARBIERE' || $_SESSION['user']['ruolo'] == 'ADMIN'){?>Sign. <?php }else{ ?> <?php } ?> <?=$_SESSION['user']['nome']?> <?=$_SESSION['user']['cognome']?>!</h2>
         <p>Gestisci i tuoi dati e prenotazioni.</p>
     </section>
 
