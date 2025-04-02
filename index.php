@@ -2,12 +2,7 @@
     include 'connessione.php';
     include 'funzioni.php';
 
-    session_start();
-
-    if(!isset($_SESSION['user'])){
-        header("Location: login.php");
-        exit();
-    }    
+    session_start();  
 
     if(isset($_SESSION['user']['ruolo']) && $_SESSION['user']['ruolo'] == 'BARBIERE'){
         header("Location: gestionale.php");
@@ -178,6 +173,10 @@
                                 <span class="text-danger"><?=$message?></span>
                             <?php }; ?>
                         </td>
+                    </tr>
+                    <!-- PREZZO -->
+                    <tr>
+                        <td id="prezzo-container"></td>
                     </tr>
                     <tr>
                         <td colspan="2">

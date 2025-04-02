@@ -6,7 +6,7 @@ if (isset($_GET['salone'])) {
     $salone = @mysqli_real_escape_string($db_conn, filtro_testo($_GET['salone']));
     
     // Recupera i servizi per il salone specificato tramite la tabella "propone"
-    $query = "SELECT s.id_servizio, s.nome, s.durata
+    $query = "SELECT s.id_servizio, s.nome, s.durata, s.prezzo
               FROM servizi s
               JOIN salone_servizio ss ON s.id_servizio = ss.fk_servizio
               WHERE ss.fk_salone = ?";

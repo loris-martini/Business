@@ -46,27 +46,50 @@ document.addEventListener("DOMContentLoaded", function () {
     const dateInput = document.getElementById("date");
     const slotsSelect = document.getElementById("slots");
     const selectedTimeInput = document.getElementById("selected-time");
+    const prezzoContainer = document.getElementById("prezzo-container");
 
     // Event listener per il cambio di salone
     if (saloneSelect) {
         saloneSelect.addEventListener("change", function () {
             const saloneId = this.value;
-
+    
             if (saloneId) {
                 serviceContainer.style.display = "table-row";
-
+    
                 fetch(`get_servizi.php?salone=${saloneId}`)
                     .then(response => response.json())
                     .then(data => {
                         serviceSelect.innerHTML = '<option value="">Seleziona un servizio</option>';
+                        
+                        // Salviamo i servizi in una mappa per recuperare il prezzo
+                        const serviziMappa = {};
+                        
                         data.forEach(servizio => {
                             const option = document.createElement("option");
                             option.value = servizio.id_servizio;
                             option.textContent = servizio.nome;
                             serviceSelect.appendChild(option);
+    
+                            // Mappiamo il servizio all'ID per il recupero del prezzo
+                            serviziMappa[servizio.id_servizio] = servizio.prezzo;
+                        });
+    
+                        // Aggiungiamo un event listener per il cambio di servizio
+                        serviceSelect.addEventListener("change", function () {
+                            const selectedServiceId = this.value;
+                            prezzoContainer.innerHTML = ""; // Puliamo il prezzo precedente
+    
+                            if (selectedServiceId && serviziMappa[selectedServiceId]) {
+                                const prezzo = document.createElement("h3");
+                                prezzo.innerText = `Prezzo: €${serviziMappa[selectedServiceId]}`;
+                                prezzoContainer.appendChild(prezzo);
+                            }
                         });
                     })
-                    .catch(error => console.error("Errore nel caricamento dei servizi:", error));
+                    .catch(error => {
+                        serviceSelect.innerHTML = `<option value="">Errore nel caricamento dei servizi</option>`;
+                        console.log("Errore nel caricamento dei servizi:", error);
+                    });
             } else {
                 serviceContainer.style.display = "none";
                 barbiereContainer.style.display = "none";
@@ -75,6 +98,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+    
 
     // Event listener per il cambio di servizio
     if (serviceSelect) {
