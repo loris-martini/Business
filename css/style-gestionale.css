@@ -1,0 +1,116 @@
+/* Impostazioni di base */
+.calendar {
+    display: grid;
+    gap: 1px;
+    background-color: #ccc;
+    height: 100%;
+    position: relative;
+    overflow-y: auto;
+    grid-template-columns: 80px repeat(5, 1fr);
+}
+
+.day-column {
+    background-color: white;
+    border: 1px solid #ccc;
+    position: relative;
+}
+
+.day-header {
+    text-align: center;
+    font-weight: bold;
+    padding: 8px;
+    background-color: #f2f2f2;
+    border-bottom: 1px solid #ccc;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.day-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Spaziatura uniforme tra gli slot */
+}
+
+.slot {
+    height: 60px; /* Altezza fissa per ciascun slot */
+    border-top: 1px solid #eee;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.appointment {
+    position: absolute;
+    left: 0;
+    right: 0;
+    background-color: #aee;
+    border: 1px solid #339;
+    border-radius: 4px;
+    padding: 4px;
+    font-size: 12px;
+    overflow: hidden;
+}
+
+/* Responsività per dispositivi mobili */
+@media (max-width: 768px) {
+    .calendar {
+        grid-template-columns: 1fr; /* Una colonna per il calendario */
+        grid-template-rows: auto;
+    }
+
+    .day-column {
+        height: auto; /* Altezza automatica per adattarsi ai contenuti */
+    }
+
+    .day-header {
+        font-size: 14px;
+        padding: 6px;
+    }
+
+    .slot {
+        font-size: 10px;
+        height: 50px; /* Ridurre l'altezza degli slot */
+    }
+
+    .appointment {
+        position: absolute;
+        left: 0;
+        right: 0;
+        background-color: #aee;
+        border: 1px solid #339;
+        border-radius: 4px;
+        padding: 4px;
+        font-size: 12px;
+        overflow: hidden;
+    }
+
+    .calendar-container {
+        padding: 10px;
+    }
+
+    .hour-column {
+        display: none; /* Nascondi la colonna delle ore sui dispositivi mobili */
+    }
+}
+
+/* Responsività per schermi molto piccoli (mobile phones) */
+@media (max-width: 480px) {
+    .day-header {
+        font-size: 12px;
+        padding: 4px;
+    }
+
+    .slot {
+        font-size: 9px;
+        height: 40px; /* Ancora più piccolo per schermi più piccoli */
+    }
+
+    .appointment {
+        font-size: 9px;
+        padding: 4px;
+    }
+}
