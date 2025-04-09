@@ -88,32 +88,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agenda Settimanale</title>
     <link rel="stylesheet" href="./css/style-gestionale.css">
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="script.js" defer></script>
 </head>
 <body>
-    <h1>Agenda Settimanale</h1>
+    <header>
+        <div class="logo">
+            <h1>Gestionale</h1>
+        </div>
+        <div id="menu"></div>
+    </header>
+    
+
+    <h2>Agenda Settimanale</h2>
 
     <div class="calendar-container" id="calendarContainer">
-        <!-- Colonna ore 
-        <div class="hour-column">
-            <?php
-                // Calcolo del range di orari più esteso tra tutti i giorni
-                $global_ora_inizio = strtotime('23:59');
-                $global_ora_fine = strtotime('00:00');
-                foreach ($giorniDisponibili as $giorno) {
-                    $tmp_start = strtotime(min(array_column($giorno['turni'], 'ora_inizio')));
-                    $tmp_end = strtotime(max(array_column($giorno['turni'], 'ora_fine')));
-                    if ($tmp_start < $global_ora_inizio) $global_ora_inizio = $tmp_start;
-                    if ($tmp_end > $global_ora_fine) $global_ora_fine = $tmp_end;
-                }
-
-                $slot_count = ($global_ora_fine - $global_ora_inizio) / 3600;
-                for ($i = 0; $i < $slot_count; $i++): ?>
-                    <div class="hour-block">
-                        <?= date("H:i", $global_ora_inizio + $i * 3600) ?>
-                    </div>
-            <?php endfor; ?>
-        </div> -->
-
         <!-- Colonne giorni -->
         <div class="calendar" style="grid-template-columns: 80px repeat(5, 1fr);">
            <!-- Colonna degli orari -->
@@ -121,9 +110,7 @@
                 <div class="day-header">Orari</div>
                 <div class="day-content">
                     <?php for ($i = 0; $i < $slot_count; $i++): ?>
-                        <div class="slot">
-                            <?= date("H:i", $global_ora_inizio + $i * 3600) ?> - <?= date("H:i", $global_ora_inizio + ($i+1) * 3600) ?>
-                        </div>
+                        <div class="slot"><?= date("H:i", $global_ora_inizio + $i * 3600) ?></div>
                     <?php endfor; ?>
                 </div>
             </div>
@@ -153,35 +140,21 @@
                         <?php foreach ($appuntamenti as $app): ?>
                             <?php if ($app['data_app'] == $giorno['data']): ?>
                                 <?php
+                                    $slot_height = 60;
 
-                                    $slot_height = 60;  // Altezza di un singolo slot (60px per 1 ora)
-                                    // Ottieni l'ora di inizio del primo turno per il giorno
-                                    $ora_inizio_turno = strtotime($giorno['turni'][0]['ora_inizio']); // Inizio del primo turno del giorno
-                                    
-                                    // Calcoliamo l'orario di inizio dell'appuntamento
+                                    // Cambiato: uso l'inizio del turno del giorno, non globale
+                                    $giorno_start = strtotime($giorno['turni'][0]['ora_inizio']);
                                     $startApp = strtotime($app['ora_inizio']);
-                                    $offset_top_minutes = ($startApp - $global_ora_inizio) / 60; // in minuti
-                                    $top = $offset_top_minutes * $slot_height / 60; // in px
-
-
-                                    // Calcoliamo l'altezza in base alla durata dell'appuntamento
+                                    $offset_top_minutes = ($startApp - $giorno_start) / 60;
                                     $duration_min = $app['durata'];
-                                    $height = ($duration_min / 60) * $slot_height; // in px
-
-
-                                    // Limitiamo l'altezza per non sforare la fine della giornata
-                                    $end_of_day = 24 * 60;  // Fine della giornata (1440 minuti)
-                                    if ($offset_top_minutes + $height > $end_of_day) {
-                                        $height = $end_of_day - $offset_top_minutes;  // Limita l'altezza alla fine della giornata
-                                    }
                                 ?>
-                                <div class="appointment"
-                                    data-minutes-from-start="<?= $offset_top_minutes ?>"
-                                    data-duration="<?= $duration_min ?>">
-                                    <?= htmlspecialchars($app['nome_servizio']) ?>
+                                <div class="slot-container">
+                                    <div class="appointment"
+                                        data-minutes-from-start="<?= $offset_top_minutes ?>"
+                                        data-duration="<?= $duration_min ?>">
+                                        <?= htmlspecialchars($app['nome_servizio']) ?>
+                                    </div>
                                 </div>
-
-
                             <?php endif; ?>
                         <?php endforeach; ?>
                     </div>
@@ -189,6 +162,16 @@
             <?php endforeach; ?>
         </div>
     </div>
+
+    <section id="contact">
+        <h2>Contattaci</h2>
+        <p>Email: info@tuosalone.com</p>
+        <p>Telefono: +39 012 3456789</p>
+    </section>
+    
+    <footer>
+        <p>&copy; 2025 Il Tuo Salone di Parrucchiere</p>
+    </footer>
 </body>
 </html>
 
@@ -198,7 +181,7 @@
 
     function resizeSlots() {
         const container = document.getElementById('calendarContainer');
-        const totalHeight = window.innerHeight - container.offsetTop - 40; // 40px di margine/padding/altro
+        const totalHeight = window.innerHeight - container.offsetTop - 40;
         const slotCount = <?= $slot_count ?>;
         const slotHeight = totalHeight / slotCount;
 
@@ -210,12 +193,11 @@
             day.style.height = `${slotHeight * slotCount}px`;
         });
 
-        // Ridimensiona anche gli appuntamenti (assumendo 1 minuto = slotHeight / 60)
         const minuteToPixel = slotHeight / 60;
         document.querySelectorAll('.appointment').forEach(app => {
-            const top = parseFloat(app.dataset.minutesFromStart); // lo passi da PHP
-            const duration = parseFloat(app.dataset.duration);     // lo passi da PHP
-            app.style.top = `${top * minuteToPixel}px`;
+            const offset = parseFloat(app.dataset.minutesFromStart);
+            const duration = parseFloat(app.dataset.duration);
+            app.style.top = `${offset * minuteToPixel}px`;
             app.style.height = `${duration * minuteToPixel}px`;
         });
     }

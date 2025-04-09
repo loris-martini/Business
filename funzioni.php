@@ -30,4 +30,19 @@
             return "Email o password non valide.";
         }
     }
+
+    function sendMail($subject, $message, $from, $to) {
+        $headers  = "MIME-Version: 1.0\r\n";
+        $headers .= "Content-type: text/html; charset=UTF-8\r\n";
+        $headers .= "From: " . $from . "\r\n";
+        $headers .= "Reply-To: " . $from . "\r\n";
+        $headers .= "X-Mailer: PHP/" . phpversion();
+    
+        if (mail($to, $subject, $message, $headers)) {
+            return "Email inviata con successo!";
+        } else {
+            return "Errore nell'invio dell'email.";
+        }
+    }
+    
 ?>

@@ -1,9 +1,14 @@
 /* Impostazioni di base */
+.calendar-container{
+    margin: 5%;
+    height: 100%;
+}
+
 .calendar {
+    height: 100%;
     display: grid;
     gap: 1px;
     background-color: #ccc;
-    height: 100%;
     position: relative;
     overflow-y: auto;
     grid-template-columns: 80px repeat(5, 1fr);
@@ -39,21 +44,31 @@
     border-top: 1px solid #eee;
     font-size: 12px;
     display: flex;
+    justify-content: center;
+}
+
+.slot-container {
+    display: flex;
+    position: absolute;
+    left: 0;
+    right: 0;
+    background-color: transparent;
+    gap: 4px;
+}
+
+.appointment {
+    width: 100%;
+    position: relative; /* cambiato da absolute */
+    background-color: #aee;
+    border: 1px solid #339;
+    border-radius: 4px;
+    font-size: 12px;
+    overflow: hidden;
+    display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.appointment {
-    position: absolute;
-    left: 0;
-    right: 0;
-    background-color: #aee;
-    border: 1px solid #339;
-    border-radius: 4px;
-    padding: 4px;
-    font-size: 12px;
-    overflow: hidden;
-}
 
 /* Responsività per dispositivi mobili */
 @media (max-width: 768px) {

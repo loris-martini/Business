@@ -9,13 +9,6 @@ if (isset($_GET['barbiere']) && isset($_GET['data']) && isset($_GET['service']))
 
     $giorno = date('l', strtotime($data));
 
-    // Recupera i turni del barbiere per il giorno selezionato
-    $query = "SELECT id_turno, ora_inizio, ora_fine FROM turni_barbieri WHERE giorno = ? AND fk_barbiere = ?";
-    $stmt = mysqli_prepare($db_conn, $query);
-    mysqli_stmt_bind_param($stmt, 'ss', $giorno, $barbiere);
-    mysqli_stmt_execute($stmt);
-    $resultOrario = mysqli_stmt_get_result($stmt);
-
     // Recupera la durata del servizio
     $query = "SELECT durata FROM servizi WHERE id_servizio = ?";
     $stmt = mysqli_prepare($db_conn, $query);
@@ -24,6 +17,13 @@ if (isset($_GET['barbiere']) && isset($_GET['data']) && isset($_GET['service']))
     $resultDurata = mysqli_stmt_get_result($stmt);
     $servizio = mysqli_fetch_assoc($resultDurata);
     $durataServizio = $servizio['durata']; // Durata in minuti
+
+    // Recupera i turni del barbiere per il giorno selezionato
+    $query = "SELECT id_turno, ora_inizio, ora_fine FROM turni_barbieri WHERE giorno = ? AND fk_barbiere = ?";
+    $stmt = mysqli_prepare($db_conn, $query);
+    mysqli_stmt_bind_param($stmt, 'ss', $giorno, $barbiere);
+    mysqli_stmt_execute($stmt);
+    $resultOrario = mysqli_stmt_get_result($stmt);
 
     $slots = [];
 

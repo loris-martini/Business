@@ -31,23 +31,35 @@
         }else{
             try{
                 mysqli_begin_transaction($db_conn);
-                $query = "SELECT id_turno FROM turni_barbieri WHERE fk_barbiere = ?";
+
+                $giorno = date('l', strtotime($date));
+
+                $query = "SELECT id_turno 
+                            FROM turni_barbieri 
+                            WHERE fk_barbiere = ? 
+                            AND giorno = ? AND ora_inizio <= ? AND ora_fine > ?";
+
                 $stmt = mysqli_prepare($db_conn, $query);
-                mysqli_stmt_bind_param($stmt, "s", $barbiere);
+                mysqli_stmt_bind_param($stmt, "ssss", $barbiere, $giorno, $time, $time);
                 mysqli_stmt_execute($stmt);
                 $result = mysqli_stmt_get_result($stmt);
                 if($result && $row = mysqli_fetch_assoc($result)){
                     $idTurno = $row['id_turno'];
-                    $stato = 'CONFERMATO';
 
-                    $query = "INSERT INTO appuntamenti (fk_cliente, fk_turno, fk_servizio, data_app, ora_inizio, stato) VALUES (?, ?, ?, ?, ?, ?)";
+                    $query = "INSERT INTO appuntamenti (fk_cliente, fk_turno, fk_servizio, data_app, ora_inizio) VALUES (?, ?, ?, ?, ?)";
                     $stmt = mysqli_prepare($db_conn, $query);
-                    mysqli_stmt_bind_param($stmt, "sissss", $_SESSION['user']['mail'], $idTurno, $servizio, $date, $time, $stato);
+                    mysqli_stmt_bind_param($stmt, "sissss", $_SESSION['user']['mail'], $idTurno, $servizio, $date, $time);
 
                     if(mysqli_stmt_execute($stmt)){
                         mysqli_commit($db_conn);
-                        $_SESSION['success'] = "Appuntamento prenotato con successo!";
-                        header("Location: ".$_SERVER['PHP_SELF']);
+                        header("Location: ".$_SERVER['PHP_SELF']."?success=1");
+
+                        $subject = "Conferma il tuo appuntamento!";
+                        $message = "<h1>Conferma Appuntamento</h1>
+                                    <p>Ciao " . $_SESSION['user']['nome'] . ",</p>
+                                    <p>Il tuo appuntamento è stato confermato per <strong>" . date("d/", strtotime($date)) . " alle " . strftime("%e %B", strtotime($time)) . "</strong>.</p>";
+
+                        $_SESSION['message'] = sendMail($subject, $message, $barbiere, $_SESSION['user']['mail']);
                         exit();
                     }else{
                         mysqli_rollback($db_conn);
@@ -103,7 +115,7 @@
     try{ if(isset($_SESSION['user'])){?>
         <center>
             <h2>Prenota il tuo appuntamento</h2>
-            <form class="row g-3" id="form-registration" action="<?= htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST">
+            <form class="row g-3" id="form-registration" action="<?= htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST" onsubmit="successAlert()">
                 <table>
                     <!--INFO-->
                     <tr>
@@ -167,9 +179,7 @@
                     <!--ALTRO-->
                     <tr>
                         <td colspan="2">
-                            <?php if(empty($message)){ ?>
-                                <span><?=isset($_SESSION['success']) ? $_SESSION['success'] : ''?></span>
-                            <?php }else{ ?>
+                            <?php if(!empty($message)){ ?>
                                 <span class="text-danger"><?=$message?></span>
                             <?php }; ?>
                         </td>
@@ -206,4 +216,15 @@
     <footer>
         <p>&copy; 2025 Il Tuo Salone di Parrucchiere</p>
     </footer>
+    <script>
+        window.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('success') === '1') {
+                alert("Prenotazione effettuata con successo!");
+                // Rimuove il parametro dalla URL senza ricaricare la pagina
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+    </script>
+</body>
 </html>

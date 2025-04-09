@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function successAlert() {
-        alert("Appuntamento prenotato con successo!");
+        return alert("Appuntamento prenotato con successo!");
     }
 
     // Elementi del form
