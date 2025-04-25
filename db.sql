@@ -113,3 +113,379 @@ CREATE TABLE appuntamenti (
         ON UPDATE CASCADE
         ON DELETE SET NULL
 ) ENGINE = InnoDB;
+
+
+-- TRIGGER --
+
+DELIMITER //
+
+-- Trigger prima dell'inserimento di un nuovo utente
+CREATE TRIGGER before_utenti_insert
+BEFORE INSERT ON utenti
+FOR EACH ROW
+BEGIN
+    -- Validazione dell'email
+    IF NEW.mail NOT REGEXP '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Formato email non valido';
+    END IF;
+
+    -- Validazione della password
+    IF NEW.password NOT REGEXP '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+={}|;:,.<>?/-]).{8,}$' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'La password deve contenere almeno 8 caratteri, una lettera minuscola, una maiuscola, un numero e un carattere speciale';
+    END IF;
+
+    -- Verifica che il numero di telefono sia valido (10 cifre, solo numeri)
+    IF NEW.numero_telefono NOT REGEXP '^[0-9]{10}$' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Il numero di telefono deve contenere esattamente 10 cifre';
+    END IF;
+END//
+
+
+
+-- Trigger prima dell'aggiornamento di un utente
+CREATE TRIGGER before_utenti_update
+BEFORE UPDATE ON utenti
+FOR EACH ROW
+BEGIN
+    -- Validazione dell'email
+    IF NEW.mail NOT REGEXP '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Formato email non valido';
+    END IF;
+
+    -- Validazione della password (solo se viene modificata)
+    IF NEW.password != OLD.password AND NEW.password NOT REGEXP '^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+={}|;:,.<>?/-]).{8,}$' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'La password deve contenere almeno 8 caratteri, una lettera minuscola, una maiuscola, un numero e un carattere speciale';
+    END IF;
+
+    -- Verifica che il numero di telefono sia valido
+    IF NEW.numero_telefono NOT REGEXP '^[0-9]{10}$' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Il numero di telefono deve contenere esattamente 10 cifre';
+    END IF;
+END//
+
+
+
+-- Trigger prima dell'inserimento di un salone
+CREATE TRIGGER before_saloni_insert
+BEFORE INSERT ON saloni
+FOR EACH ROW
+BEGIN
+    -- Verifica che orario_apertura < orario_chiusura
+    IF NEW.orario_apertura >= NEW.orario_chiusura THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = "L'orario di apertura deve essere inferiore all'orario di chiusura";
+    END IF;
+
+    -- Verifica che i posti siano positivi
+    IF NEW.posti <= 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Il numero di posti deve essere maggiore di zero';
+    END IF;
+END//
+
+
+
+-- Trigger prima dell'aggiornamento di un salone
+CREATE TRIGGER before_saloni_update
+BEFORE UPDATE ON saloni
+FOR EACH ROW
+BEGIN
+    -- Verifica che orario_apertura < orario_chiusura
+    IF NEW.orario_apertura >= NEW.orario_chiusura THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = "L'orario di apertura deve essere inferiore all'orario di chiusura";
+    END IF;
+
+    -- Verifica che i posti siano positivi
+    IF NEW.posti <= 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Il numero di posti deve essere maggiore di zero';
+    END IF;
+END//
+
+
+
+
+-- Trigger prima dell'inserimento di un turno
+CREATE TRIGGER before_turni_barbieri_insert
+BEFORE INSERT ON turni_barbieri
+FOR EACH ROW
+BEGIN
+    DECLARE salone_apertura TIME;
+    DECLARE salone_chiusura TIME;
+
+    -- Verifica che ora_inizio < ora_fine
+    IF NEW.ora_inizio >= NEW.ora_fine THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = "L'orario di inizio del turno deve essere inferiore all\'orario di fine";
+    END IF;
+
+    -- Recupera gli orari di apertura e chiusura del salone
+    SELECT orario_apertura, orario_chiusura
+    INTO salone_apertura, salone_chiusura
+    FROM saloni
+    WHERE id_salone = NEW.fk_salone;
+
+    -- Verifica che il turno sia all'interno degli orari del salone
+    IF NEW.ora_inizio < salone_apertura OR NEW.ora_fine > salone_chiusura THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = "Il turno deve essere all'interno degli orari di apertura del salone";
+    END IF;
+
+    -- Verifica sovrapposizioni di turni per lo stesso barbiere nello stesso giorno e salone 
+    IF EXISTS (
+        SELECT 1
+        FROM turni_barbieri
+        WHERE fk_barbiere = NEW.fk_barbiere
+        AND fk_salone = NEW.fk_salone
+        AND giorno = NEW.giorno
+        AND (
+            (NEW.ora_inizio <= ora_fine AND NEW.ora_fine >= ora_inizio)
+        )
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Sovrapposizione di turni per lo stesso barbiere nello stesso giorno e salone';
+    END IF;
+END//
+
+-- Trigger prima dell'aggiornamento di un turno
+CREATE TRIGGER before_turni_barbieri_update
+BEFORE UPDATE ON turni_barbieri
+FOR EACH ROW
+BEGIN
+    DECLARE salone_apertura TIME;
+    DECLARE salone_chiusura TIME;
+
+    -- Verifica che ora_inizio < ora_fine
+    IF NEW.ora_inizio >= NEW.ora_fine THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = "L'orario di inizio del turno deve essere inferiore all\'orario di fine";
+    END IF;
+
+    -- Recupera gli orari di apertura e chiusura del salone
+    SELECT orario_apertura, orario_chiusura
+    INTO salone_apertura, salone_chiusura
+    FROM saloni
+    WHERE id_salone = NEW.fk_salone;
+
+    -- Verifica che il turno sia all'interno degli orari del salone
+    IF NEW.ora_inizio < salone_apertura OR NEW.ora_fine > salone_chiusura THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = "Il turno deve essere all'interno degli orari di apertura del salone";
+    END IF;
+
+    -- Verifica sovrapposizioni di turni per lo stesso barbiere nello stesso giorno e salone
+    IF EXISTS (
+        SELECT 1
+        FROM turni_barbieri
+        WHERE fk_barbiere = NEW.fk_barbiere
+        AND fk_salone = NEW.fk_salone
+        AND giorno = NEW.giorno
+        AND id_turno != OLD.id_turno
+        AND (
+            (NEW.ora_inizio <= ora_fine AND NEW.ora_fine >= ora_inizio)
+        )
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Sovrapposizione di turni per lo stesso barbiere nello stesso giorno e salone';
+    END IF;
+END//
+
+
+
+-- Trigger prima dell'inserimento di un appuntamento
+CREATE TRIGGER before_appuntamenti_insert
+BEFORE INSERT ON appuntamenti
+FOR EACH ROW
+BEGIN
+    DECLARE turno_inizio TIME;
+    DECLARE turno_fine TIME;
+    DECLARE turno_giorno ENUM('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday');
+    DECLARE barbiere VARCHAR(100);
+    DECLARE salone INT;
+    DECLARE durata_servizio INT;
+
+    -- Recupera informazioni sul turno
+    SELECT ora_inizio, ora_fine, giorno, fk_barbiere, fk_salone
+    INTO turno_inizio, turno_fine, turno_giorno, barbiere, salone
+    FROM turni_barbieri
+    WHERE id_turno = NEW.fk_turno;
+
+    -- Verifica che il turno esista
+    IF turno_inizio IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Turno non valido';
+    END IF;
+
+    -- Verifica che il giorno dell'appuntamento corrisponda al giorno del turno
+    IF turno_giorno != DAYNAME(NEW.data_app) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = "Il giorno dell'appuntamento non corrisponde al giorno del turno";
+    END IF;
+
+    -- Recupera la durata del servizio
+    SELECT durata INTO durata_servizio
+    FROM servizi
+    WHERE id_servizio = NEW.fk_servizio;
+
+    -- Verifica che l'orario dell'appuntamento sia all'interno del turno
+    IF NEW.ora_inizio < turno_inizio OR 
+       ADDTIME(NEW.ora_inizio, SEC_TO_TIME(durata_servizio * 60)) > turno_fine THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = "L'appuntamento non è compatibile con gli orari del turno";
+    END IF;
+
+    -- Verifica che il barbiere sia associato al salone
+    IF NOT EXISTS (
+        SELECT 1
+        FROM barbiere_salone
+        WHERE fk_barbiere = barbiere
+        AND fk_salone = salone
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Il barbiere non è associato al salone del turno';
+    END IF;
+
+    -- Verifica che il servizio sia offerto dal salone
+    IF NOT EXISTS (
+        SELECT 1
+        FROM salone_servizio
+        WHERE fk_salone = salone
+        AND fk_servizio = NEW.fk_servizio
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Il servizio non è offerto dal salone';
+    END IF;
+
+    -- Verifica che il barbiere offra il servizio
+    IF NOT EXISTS (
+        SELECT 1
+        FROM barbiere_servizio
+        WHERE fk_barbiere = barbiere
+        AND fk_servizio = NEW.fk_servizio
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Il barbiere non offre il servizio selezionato';
+    END IF;
+
+    -- Verifica sovrapposizioni di appuntamenti per lo stesso barbiere
+    IF EXISTS (
+        SELECT 1
+        FROM appuntamenti a
+        JOIN servizi s ON a.fk_servizio = s.id_servizio
+        JOIN turni_barbieri t ON a.fk_turno = t.id_turno
+        WHERE t.fk_barbiere = barbiere
+        AND a.data_app = NEW.data_app
+        AND a.stato != 'CANCELLATO'
+        AND (
+            (NEW.ora_inizio <= ADDTIME(a.ora_inizio, SEC_TO_TIME(s.durata * 60)) AND 
+             ADDTIME(NEW.ora_inizio, SEC_TO_TIME(durata_servizio * 60)) >= a.ora_inizio)
+        )
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Sovrapposizione di appuntamenti per lo stesso barbiere';
+    END IF;
+END//
+
+-- Trigger prima dell'aggiornamento di un appuntamento
+CREATE TRIGGER before_appuntamenti_update
+BEFORE UPDATE ON appuntamenti
+FOR EACH ROW
+BEGIN
+    DECLARE turno_inizio TIME;
+    DECLARE turno_fine TIME;
+    DECLARE turno_giorno ENUM('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday');
+    DECLARE barbiere VARCHAR(100);
+    DECLARE salone INT;
+    DECLARE durata_servizio INT;
+
+    -- Recupera informazioni sul turno
+    SELECT ora_inizio, ora_fine, giorno, fk_barbiere, fk_salone
+    INTO turno_inizio, turno_fine, turno_giorno, barbiere, salone
+    FROM turni_barbieri
+    WHERE id_turno = NEW.fk_turno;
+
+    -- Verifica che il turno esista
+    IF turno_inizio IS NULL THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Turno non valido';
+    END IF;
+
+    -- Verifica che il giorno dell'appuntamento corrisponda al giorno del turno
+    IF turno_giorno != DAYNAME(NEW.data_app) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = "Il giorno dell'appuntamento non corrisponde al giorno del turno";
+    END IF;
+
+    -- Recupera la durata del servizio
+    SELECT durata INTO durata_servizio
+    FROM servizi
+    WHERE id_servizio = NEW.fk_servizio;
+
+    -- Verifica che l'orario dell'appuntamento sia all'interno del turno
+    IF NEW.ora_inizio < turno_inizio OR 
+       ADDTIME(NEW.ora_inizio, SEC_TO_TIME(durata_servizio * 60)) > turno_fine THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = "L'appuntamento non è compatibile con gli orari del turno";
+    END IF;
+
+    -- Verifica che il barbiere sia associato al salone
+    IF NOT EXISTS (
+        SELECT 1
+        FROM barbiere_salone
+        WHERE fk_barbiere = barbiere
+        AND fk_salone = salone
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Il barbiere non è associato al salone del turno';
+    END IF;
+
+    -- Verifica che il servizio sia offerto dal salone
+    IF NOT EXISTS (
+        SELECT 1
+        FROM salone_servizio
+        WHERE fk_salone = salone
+        AND fk_servizio = NEW.fk_servizio
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Il servizio non è offerto dal salone';
+    END IF;
+
+    -- Verifica che il barbiere offra il servizio
+    IF NOT EXISTS (
+        SELECT 1
+        FROM barbiere_servizio
+        WHERE fk_barbiere = barbiere
+        AND fk_servizio = NEW.fk_servizio
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Il barbiere non offre il servizio selezionato';
+    END IF;
+
+    -- Verifica sovrapposizioni di appuntamenti per lo stesso barbiere
+    IF EXISTS (
+        SELECT 1
+        FROM appuntamenti a
+        JOIN servizi s ON a.fk_servizio = s.id_servizio
+        JOIN turni_barbieri t ON a.fk_turno = t.id_turno
+        WHERE t.fk_barbiere = barbiere
+        AND a.data_app = NEW.data_app
+        AND a.id_appuntamento != OLD.id_appuntamento
+        AND a.stato != 'CANCELLATO'
+        AND (
+            (NEW.ora_inizio <= ADDTIME(a.ora_inizio, SEC_TO_TIME(s.durata * 60)) AND 
+             ADDTIME(NEW.ora_inizio, SEC_TO_TIME(durata_servizio * 60)) >= a.ora_inizio)
+        )
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Sovrapposizione di appuntamenti per lo stesso barbiere';
+    END IF;
+END//
+
+DELIMITER ;
