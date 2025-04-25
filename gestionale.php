@@ -149,11 +149,12 @@
                                     $duration_min = $app['durata'];
                                 ?>
                                 <div class="slot-container">
-                                    <div class="appointment"
-                                        data-minutes-from-start="<?= $offset_top_minutes ?>"
-                                        data-duration="<?= $duration_min ?>">
-                                        <?= htmlspecialchars($app['nome_servizio']) ?>
-                                    </div>
+                                <div class="appointment"
+                                    data-minutes-from-start="<?= $offset_top_minutes ?>"
+                                    data-duration="<?= $duration_min ?>"
+                                    style="background-color: <?= getColorByState($app['stato']) ?>">
+                                    <?= htmlspecialchars($app['nome_servizio']) ?>
+                                </div>
                                 </div>
                             <?php endif; ?>
                         <?php endforeach; ?>

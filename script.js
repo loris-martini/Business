@@ -1,8 +1,48 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // Menu di navigazione dinamico
-    const menu = document.getElementById("menu");
-    if (menu) {
-        menu.innerHTML = `
+    // Elementi DOM
+    const elements = {
+        menu: document.getElementById("menu"),
+        serviceContainer: document.getElementById("service-container"),
+        barbiereContainer: document.getElementById("barbiere-container"),
+        dateTimeContainer: document.getElementById("date-time"),
+        slotsContainer: document.getElementById("slots-container"),
+        saloneSelect: document.getElementById("salone"),
+        serviceSelect: document.getElementById("service"),
+        barbiereSelect: document.getElementById("barbiere"),
+        dateInput: document.getElementById("date"),
+        slotsSelect: document.getElementById("slots"),
+        selectedTimeInput: document.getElementById("selected-time"),
+        prezzoContainer: document.getElementById("prezzo-container")
+    };
+
+    // Funzioni di utilità
+    const setDisplay = (element, display) => {
+        if (element) element.style.display = display;
+    };
+
+    const resetSelect = (select, defaultOption) => {
+        if (select) select.innerHTML = `<option value="">${defaultOption}</option>`;
+    };
+
+    const fetchData = async (url) => {
+        try {
+            const response = await fetch(url);
+            return await response.json();
+        } catch (error) {
+            console.error(`Errore nel caricamento dei dati: ${error}`);
+            throw error;
+        }
+    };
+
+    const showError = (select, message) => {
+        if (select) select.innerHTML = `<option value="">${message}</option>`;
+    };
+
+    const confirmAction = (message) => confirm(message);
+
+    // Inizializzazione menu dinamico
+    if (elements.menu) {
+        elements.menu.innerHTML = `
             <nav>
                 <ul>
                     <li><a href="/business/index.php">Home</a></li>
@@ -14,178 +54,153 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
     }
 
-    // Funzioni di conferma
-    function confirmLogout() {
-        return confirm("Sei sicuro di volerti sloggare?");
-    }
+    // Nascondi inizialmente i contenitori
+    setDisplay(elements.serviceContainer, "none");
+    setDisplay(elements.barbiereContainer, "none");
+    setDisplay(elements.dateTimeContainer, "none");
+    setDisplay(elements.slotsContainer, "none");
 
-    function confirmDelete() {
-        return confirm("Sei sicuro di voler cancellare i tuoi dati? Questa azione è irreversibile.");
-    }
+    // Funzione per caricare i servizi
+    const loadServizi = async (saloneId) => {
+        resetSelect(elements.serviceSelect, "Seleziona un servizio");
+        const serviziMappa = {};
+        try {
+            const data = await fetchData(`get_servizi.php?salone=${saloneId}`);
+            data.forEach(servizio => {
+                const option = document.createElement("option");
+                option.value = servizio.id_servizio;
+                option.textContent = servizio.nome;
+                elements.serviceSelect.appendChild(option);
+                serviziMappa[servizio.id_servizio] = servizio.prezzo;
+            });
 
-    function successAlert() {
-        return alert("Appuntamento prenotato con successo!");
-    }
+            // Aggiorna il prezzo quando cambia il servizio
+            elements.serviceSelect.addEventListener("change", () => {
+                const selectedServiceId = elements.serviceSelect.value;
+                elements.prezzoContainer.innerHTML = "";
+                if (selectedServiceId && serviziMappa[selectedServiceId]) {
+                    const prezzo = document.createElement("h3");
+                    prezzo.innerText = `Prezzo: €${serviziMappa[selectedServiceId]}`;
+                    elements.prezzoContainer.appendChild(prezzo);
+                }
+            });
+        } catch {
+            showError(elements.serviceSelect, "Errore nel caricamento dei servizi");
+        }
+    };
 
-    // Elementi del form
-    const serviceContainer = document.getElementById("service-container");
-    const barbiereContainer = document.getElementById("barbiere-container");
-    const dateTimeContainer = document.getElementById("date-time");
-    const slotsContainer = document.getElementById("slots-container");
+    // Funzione per caricare i barbieri
+    const loadBarbieri = async (servizioId) => {
+        resetSelect(elements.barbiereSelect, "Seleziona un barbiere");
+        try {
+            const data = await fetchData(`get_barbieri.php?servizio=${servizioId}`);
+            data.forEach(barbiere => {
+                const option = document.createElement("option");
+                option.value = barbiere.mail;
+                option.textContent = `${barbiere.nome} ${barbiere.cognome}`;
+                elements.barbiereSelect.appendChild(option);
+            });
+        } catch (error) {
+            showError(elements.barbiereSelect, `Errore nel caricamento dei barbieri: ${error}`);
+        }
+    };
 
-    // Nascondi inizialmente gli elementi
-    if (serviceContainer) serviceContainer.style.display = "none";
-    if (barbiereContainer) barbiereContainer.style.display = "none";
-    if (dateTimeContainer) dateTimeContainer.style.display = "none";
-    if (slotsContainer) slotsContainer.style.display = "none";
+    // Funzione per caricare gli slot disponibili
+    const loadSlots = async (barbiere, date, service) => {
+        resetSelect(elements.slotsSelect, "Seleziona un orario");
+        try {
+            const data = await fetchData(`get_orari_disponibili.php?barbiere=${barbiere}&data=${date}&service=${service}`);
+            if (data.length === 0) {
+                elements.slotsSelect.innerHTML = '<option value="">Nessun orario disponibile</option>';
+            } else {
+                data.forEach(slot => {
+                    if (slot.available) {
+                        const option = document.createElement("option");
+                        option.value = slot.start;
+                        option.textContent = `${slot.start} - ${slot.end}`;
+                        elements.slotsSelect.appendChild(option);
+                    }
+                });
+            }
+            setDisplay(elements.slotsContainer, "block");
+        } catch {
+            alert("Errore nel recupero degli orari. Riprova più tardi.");
+        }
+    };
 
-    // Elementi selettori
-    const saloneSelect = document.getElementById("salone");
-    const serviceSelect = document.getElementById("service");
-    const barbiereSelect = document.getElementById("barbiere");
-    const dateInput = document.getElementById("date");
-    const slotsSelect = document.getElementById("slots");
-    const selectedTimeInput = document.getElementById("selected-time");
-    const prezzoContainer = document.getElementById("prezzo-container");
-
-    // Event listener per il cambio di salone
-    if (saloneSelect) {
-        saloneSelect.addEventListener("change", function () {
-            const saloneId = this.value;
-    
+    // Event listener per il salone
+    if (elements.saloneSelect) {
+        elements.saloneSelect.addEventListener("change", async () => {
+            const saloneId = elements.saloneSelect.value;
             if (saloneId) {
-                serviceContainer.style.display = "table-row";
-    
-                fetch(`get_servizi.php?salone=${saloneId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        serviceSelect.innerHTML = '<option value="">Seleziona un servizio</option>';
-                        
-                        // Salviamo i servizi in una mappa per recuperare il prezzo
-                        const serviziMappa = {};
-                        
-                        data.forEach(servizio => {
-                            const option = document.createElement("option");
-                            option.value = servizio.id_servizio;
-                            option.textContent = servizio.nome;
-                            serviceSelect.appendChild(option);
-    
-                            // Mappiamo il servizio all'ID per il recupero del prezzo
-                            serviziMappa[servizio.id_servizio] = servizio.prezzo;
-                        });
-    
-                        // Aggiungiamo un event listener per il cambio di servizio
-                        serviceSelect.addEventListener("change", function () {
-                            const selectedServiceId = this.value;
-                            prezzoContainer.innerHTML = ""; // Puliamo il prezzo precedente
-    
-                            if (selectedServiceId && serviziMappa[selectedServiceId]) {
-                                const prezzo = document.createElement("h3");
-                                prezzo.innerText = `Prezzo: €${serviziMappa[selectedServiceId]}`;
-                                prezzoContainer.appendChild(prezzo);
-                            }
-                        });
-                    })
-                    .catch(error => {
-                        serviceSelect.innerHTML = `<option value="">Errore nel caricamento dei servizi</option>`;
-                        console.log("Errore nel caricamento dei servizi:", error);
-                    });
+                setDisplay(elements.serviceContainer, "table-row");
+                await loadServizi(saloneId);
             } else {
-                serviceContainer.style.display = "none";
-                barbiereContainer.style.display = "none";
-                dateTimeContainer.style.display = "none";
-                slotsContainer.style.display = "none";
+                setDisplay(elements.serviceContainer, "none");
+                setDisplay(elements.barbiereContainer, "none");
+                setDisplay(elements.dateTimeContainer, "none");
+                setDisplay(elements.slotsContainer, "none");
             }
         });
     }
-    
 
-    // Event listener per il cambio di servizio
-    if (serviceSelect) {
-        serviceSelect.addEventListener("change", function () {
-            const servizioId = this.value;
-
+    // Event listener per il servizio
+    if (elements.serviceSelect) {
+        elements.serviceSelect.addEventListener("change", async () => {
+            const servizioId = elements.serviceSelect.value;
             if (servizioId) {
-                barbiereContainer.style.display = "table-row";
+                setDisplay(elements.barbiereContainer, "table-row");
+                resetSelect(elements.slotsSelect, "Seleziona un orario");
+                setDisplay(elements.slotsContainer, "none");
+                await loadBarbieri(servizioId);
 
-                fetch(`get_barbieri.php?servizio=${servizioId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        barbiereSelect.innerHTML = '<option value="">Seleziona un barbiere</option>';
-                        data.forEach(barbiere => {
-                            const option = document.createElement("option");
-                            option.value = barbiere.mail;
-                            option.textContent = `${barbiere.nome} ${barbiere.cognome}`;
-                            barbiereSelect.appendChild(option);
-                        });
-                    })
-                    .catch(error => {
-                        barbiereSelect.innerHTML = `<option value="">Errore nel caricamento dei barbieri ${error}</option>`;
-                        console.log("Errore nel caricamento dei barbieri:", error)
-
-                    });
+                // Ricalcola gli slot se barbiere e data sono già selezionati
+                const barbiere = elements.barbiereSelect.value;
+                const date = elements.dateInput.value;
+                if (barbiere && date) {
+                    await loadSlots(barbiere, date, servizioId);
+                }
             } else {
-                barbiereContainer.style.display = "none";
-                dateTimeContainer.style.display = "none";
-                slotsContainer.style.display = "none";
+                setDisplay(elements.barbiereContainer, "none");
+                setDisplay(elements.dateTimeContainer, "none");
+                setDisplay(elements.slotsContainer, "none");
             }
         });
     }
 
-    // Event listener per il cambio di barbiere
-    if (barbiereSelect) {
-        barbiereSelect.addEventListener("change", function () {
-            if (this.value) {
-                dateTimeContainer.style.display = "table-row";
-            } else {
-                dateTimeContainer.style.display = "none";
-                slotsContainer.style.display = "none";
-            }
+    // Event listener per il barbiere
+    if (elements.barbiereSelect) {
+        elements.barbiereSelect.addEventListener("change", () => {
+            setDisplay(elements.dateTimeContainer, elements.barbiereSelect.value ? "table-row" : "none");
+            setDisplay(elements.slotsContainer, "none");
         });
     }
 
-    // Event listener per il cambio di data
-    if (dateInput) {
-        dateInput.addEventListener("change", function () {
-            const date = this.value;
+    // Event listener per la data
+    if (elements.dateInput) {
+        elements.dateInput.addEventListener("change", async () => {
+            const { dateInput, barbiereSelect, serviceSelect } = elements;
+            const date = dateInput.value;
             const barbiere = barbiereSelect.value;
             const service = serviceSelect.value;
 
             if (date && barbiere && service) {
-                fetch(`get_orari_disponibili.php?barbiere=${barbiere}&data=${date}&service=${service}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        slotsSelect.innerHTML = '<option value="">Seleziona un orario</option>';
-
-                        if (data.length === 0) {
-                            slotsSelect.innerHTML = '<option value="">Nessun orario disponibile</option>';
-                        } else {
-                            data.forEach(slot => {
-                                if (slot.available) {
-                                    const option = document.createElement("option");
-                                    option.value = `${slot.start}`;
-                                    option.textContent = `${slot.start} - ${slot.end}`;
-                                    slotsSelect.appendChild(option);
-                                }
-                            });
-                        }
-
-                        slotsContainer.style.display = "block";
-                    })
-                    .catch(error => {
-                        console.error("Errore nel recupero degli orari:", error);
-                        alert("Errore nel recupero degli orari. Riprova più tardi.");
-                    });
+                await loadSlots(barbiere, date, service);
             } else {
-                slotsContainer.style.display = "none";
+                setDisplay(elements.slotsContainer, "none");
             }
         });
     }
 
-    // Event listener per la selezione dello slot
-    if (slotsSelect) {
-        slotsSelect.addEventListener("change", function () {
-            selectedTimeInput.value = this.value;
+    // Event listener per gli slot
+    if (elements.slotsSelect) {
+        elements.slotsSelect.addEventListener("change", () => {
+            elements.selectedTimeInput.value = elements.slotsSelect.value;
         });
     }
+
+    // Funzioni di conferma
+    window.confirmLogout = () => confirmAction("Sei sicuro di volerti sloggare?");
+    window.confirmDelete = () => confirmAction("Sei sicuro di voler cancellare i tuoi dati? Questa azione è irreversibile.");
+    window.successAlert = () => alert("Appuntamento prenotato con successo!");
 });

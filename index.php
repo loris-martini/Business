@@ -1,80 +1,84 @@
 <?php
-    include 'connessione.php';
-    include 'funzioni.php';
+include 'connessione.php';
+include 'funzioni.php';
 
-    session_start();  
+session_start();  
 
-    if(isset($_SESSION['user']['ruolo']) && $_SESSION['user']['ruolo'] == 'BARBIERE'){
-        header("Location: gestionale.php");
-        exit();
-    }
+if (isset($_SESSION['user']['ruolo']) && $_SESSION['user']['ruolo'] == 'BARBIERE') {
+    header("Location: gestionale.php");
+    exit();
+}
 
-    $date = $time = $barbiere = $servizio = $salone = $message = '';
+$date = $time = $barbiere = $servizio = $salone = $message = '';
 
-    $query = "SELECT id_salone, indirizzo, nome FROM saloni";
-    $resultSaloni = mysqli_query($db_conn, $query);
+$query = "SELECT id_salone, indirizzo, nome FROM saloni";
+$resultSaloni = mysqli_query($db_conn, $query);
 
-    if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
-        $date =         @mysqli_real_escape_string($db_conn, filtro_testo($_POST['date']));
-        $time =         @mysqli_real_escape_string($db_conn, filtro_testo($_POST['time']));
-        $time =         $time . ":00";
-        $barbiere =     @mysqli_real_escape_string($db_conn, filtro_testo($_POST['barbiere']));
-        $servizio =     @mysqli_real_escape_string($db_conn, ucwords(strtolower(filtro_testo($_POST['service']))));
-        $salone =       @mysqli_real_escape_string($db_conn, filtro_testo($_POST['salone']));
+if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
+    $date = @mysqli_real_escape_string($db_conn, filtro_testo($_POST['date']));
+    $time = @mysqli_real_escape_string($db_conn, filtro_testo($_POST['time']));
+    $time = $time . ":00";
+    $barbiere = @mysqli_real_escape_string($db_conn, filtro_testo($_POST['barbiere']));
+    $servizio = @mysqli_real_escape_string($db_conn, ucwords(strtolower(filtro_testo($_POST['service']))));
+    $salone = @mysqli_real_escape_string($db_conn, filtro_testo($_POST['salone']));
 
-        if(empty($date) || empty($time) || empty($barbiere) || empty($servizio) || empty($salone) || empty($_SESSION['user']['mail'])){
-            if(empty($_SESSION['user']['mail'])){
-                $message = "Utente non autenticato";
-            }else{
-                $message = "Tutti i campi sono obbligatori.";
-            }
-        }else{
-            try{
-                mysqli_begin_transaction($db_conn);
+    if (empty($date) || empty($time) || empty($barbiere) || empty($servizio) || empty($salone) || empty($_SESSION['user']['mail'])) {
+        if (empty($_SESSION['user']['mail'])) {
+            $message = "Utente non autenticato";
+        } else {
+            $message = "Tutti i campi sono obbligatori.";
+        }
+    } else {
+        try {
+            mysqli_begin_transaction($db_conn);
 
-                $giorno = date('l', strtotime($date));
+            $giorno = date('l', strtotime($date));
 
-                $query = "SELECT id_turno 
-                            FROM turni_barbieri 
-                            WHERE fk_barbiere = ? 
-                            AND giorno = ? AND ora_inizio <= ? AND ora_fine > ?";
+            $query = "SELECT id_turno 
+                      FROM turni_barbieri 
+                      WHERE fk_barbiere = ? 
+                      AND giorno = ? 
+                      AND ora_inizio <= ? 
+                      AND ora_fine > ?";
+            $stmt = mysqli_prepare($db_conn, $query);
+            mysqli_stmt_bind_param($stmt, "ssss", $barbiere, $giorno, $time, $time);
+            mysqli_stmt_execute($stmt);
+            $result = mysqli_stmt_get_result($stmt);
 
+            if ($result && $row = mysqli_fetch_assoc($result)) {
+                $idTurno = $row['id_turno'];
+
+                $query = "INSERT INTO appuntamenti (fk_cliente, fk_turno, fk_servizio, data_app, ora_inizio) VALUES (?, ?, ?, ?, ?)";
                 $stmt = mysqli_prepare($db_conn, $query);
-                mysqli_stmt_bind_param($stmt, "ssss", $barbiere, $giorno, $time, $time);
-                mysqli_stmt_execute($stmt);
-                $result = mysqli_stmt_get_result($stmt);
-                if($result && $row = mysqli_fetch_assoc($result)){
-                    $idTurno = $row['id_turno'];
+                mysqli_stmt_bind_param($stmt, "siiss", $_SESSION['user']['mail'], $idTurno, $servizio, $date, $time);
 
-                    $query = "INSERT INTO appuntamenti (fk_cliente, fk_turno, fk_servizio, data_app, ora_inizio) VALUES (?, ?, ?, ?, ?)";
-                    $stmt = mysqli_prepare($db_conn, $query);
-                    mysqli_stmt_bind_param($stmt, "sissss", $_SESSION['user']['mail'], $idTurno, $servizio, $date, $time);
+                if (mysqli_stmt_execute($stmt)) {
+                    mysqli_commit($db_conn);
 
-                    if(mysqli_stmt_execute($stmt)){
-                        mysqli_commit($db_conn);
-                        header("Location: ".$_SERVER['PHP_SELF']."?success=1");
+                    // Invia l'email prima del reindirizzamento
+                    $subject = "Conferma il tuo appuntamento!";
+                    $emailMessage = "<h1>Conferma Appuntamento</h1>
+                                    <p>Ciao " . htmlspecialchars($_SESSION['user']['nome']) . ",</p>
+                                    <p>Il tuo appuntamento è stato confermato per <strong>" . date("d/m/Y", strtotime($date)) . " alle " . date("H:i", strtotime($time)) . "</strong>.</p>";
+                    $_SESSION['message'] = sendMail($subject, $emailMessage, $barbiere, $_SESSION['user']['mail']);
 
-                        $subject = "Conferma il tuo appuntamento!";
-                        $message = "<h1>Conferma Appuntamento</h1>
-                                    <p>Ciao " . $_SESSION['user']['nome'] . ",</p>
-                                    <p>Il tuo appuntamento è stato confermato per <strong>" . date("d/", strtotime($date)) . " alle " . strftime("%e %B", strtotime($time)) . "</strong>.</p>";
-
-                        $_SESSION['message'] = sendMail($subject, $message, $barbiere, $_SESSION['user']['mail']);
-                        exit();
-                    }else{
-                        mysqli_rollback($db_conn);
-                        $message = "Errore durante l'inserimento";
-                    }
-                }else{
+                    // Reindirizza e interrompi l'esecuzione
+                    header("Location: " . $_SERVER['PHP_SELF'] . "?success=1");
+                    exit();
+                } else {
                     mysqli_rollback($db_conn);
-                    $message = "barbiere non trovato";
+                    $message = "Errore durante l'inserimento";
                 }
-            } catch (Exception $ex) {
+            } else {
                 mysqli_rollback($db_conn);
-                $message = "Errore SQL: " . $ex->getMessage();
+                $message = "Barbiere non disponibile per l'orario selezionato";
             }
+        } catch (Exception $ex) {
+            mysqli_rollback($db_conn);
+            $message = "Errore SQL: " . $ex->getMessage();
         }
     }
+}
 ?>
 
 <!DOCTYPE html>
@@ -115,7 +119,7 @@
     try{ if(isset($_SESSION['user'])){?>
         <center>
             <h2>Prenota il tuo appuntamento</h2>
-            <form class="row g-3" id="form-registration" action="<?= htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST" onsubmit="successAlert()">
+            <form class="row g-3" id="form-registration" action="<?= htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST">
                 <table>
                     <!--INFO-->
                     <tr>

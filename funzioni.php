@@ -44,5 +44,14 @@
             return "Errore nell'invio dell'email.";
         }
     }
-    
+
+    function getColorByState($state) {
+        switch($state) {
+            case 'IN_ATTESA': return 'red';
+            case 'CONFERMATO': return 'yellow';
+            case 'COMPLETATO': return 'green';
+            case 'CANCELLATO': return 'black';
+            default: return 'gray'; // Colore di default se lo stato non è riconosciuto
+        }
+    }
 ?>
