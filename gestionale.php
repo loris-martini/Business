@@ -7,6 +7,9 @@
     if (!isset($_SESSION['user'])) {
         header("Location: login.php");
         exit();
+    }elseif(!($_SESSION['user']['ruolo'] == 'BARBIERE')) {
+        header("Location: login.php");
+        exit();
     }
 
     $mail = $_SESSION['user']['mail'];
@@ -35,7 +38,9 @@
     $giorniDisponibili = [];
 
     $settimanaCorrente = 0;
-    while (count($giorniDisponibili) < 5) {
+    $maxSettimane = 10; // previene loop infinito
+    
+    while (count($giorniDisponibili) < 5 && $settimanaCorrente < $maxSettimane) {
         foreach ($giorniSettimana as $giorno) {
             if (isset($giorni_turno[$giorno])) {
                 $data = strtotime("$giorno +$settimanaCorrente week", $oggi);
@@ -102,67 +107,73 @@
 
     <h2>Agenda Settimanale</h2>
 
-    <div class="calendar-container" id="calendarContainer">
-        <!-- Colonne giorni -->
-        <div class="calendar" style="grid-template-columns: 80px repeat(5, 1fr);">
-           <!-- Colonna degli orari -->
-            <div class="day-column">
-                <div class="day-header">Orari</div>
-                <div class="day-content">
-                    <?php for ($i = 0; $i < $slot_count; $i++): ?>
-                        <div class="slot"><?= date("H:i", $global_ora_inizio + $i * 3600) ?></div>
-                    <?php endfor; ?>
-                </div>
-            </div>
-
-            <!-- Colonne per i 5 giorni con turni -->
-            <?php foreach ($giorniDisponibili as $giorno): ?>
-                <?php
-                    $turni = $giorno['turni'];
-                    $ora_inizio_giorno = strtotime(min(array_column($turni, 'ora_inizio')));
-                    $ora_fine_giorno = strtotime(max(array_column($turni, 'ora_fine')));
-                ?>
+    <?php if (empty($giorniDisponibili)): ?>
+        <div class="calendar-container">
+            <h2>Non ci sono turni al momento.</h2>
+        </div>
+    <?php else: ?>
+        <div class="calendar-container" id="calendarContainer">
+            <!-- Colonne giorni -->
+            <div class="calendar" style="grid-template-columns: 80px repeat(5, 1fr);">
+            <!-- Colonna degli orari -->
                 <div class="day-column">
-                    <div class="day-header">
-                        <?= $giorno['giorno_settimana'] ?> <br>
-                        <?= date("d/m", strtotime($giorno['data'])) ?>
-                    </div>
-
-                    <!-- Contenitore slot + appuntamenti -->
+                    <div class="day-header">Orari</div>
                     <div class="day-content">
                         <?php for ($i = 0; $i < $slot_count; $i++): ?>
-                            <div class="slot">
-                                <!-- Slot vuoto -->
-                            </div>
+                            <div class="slot"><?= date("H:i", $global_ora_inizio + $i * 3600) ?></div>
                         <?php endfor; ?>
-
-                        <!-- Appuntamenti -->
-                        <?php foreach ($appuntamenti as $app): ?>
-                            <?php if ($app['data_app'] == $giorno['data']): ?>
-                                <?php
-                                    $slot_height = 60;
-
-                                    // Cambiato: uso l'inizio del turno del giorno, non globale
-                                    $giorno_start = strtotime($giorno['turni'][0]['ora_inizio']);
-                                    $startApp = strtotime($app['ora_inizio']);
-                                    $offset_top_minutes = ($startApp - $giorno_start) / 60;
-                                    $duration_min = $app['durata'];
-                                ?>
-                                <div class="slot-container">
-                                <div class="appointment"
-                                    data-minutes-from-start="<?= $offset_top_minutes ?>"
-                                    data-duration="<?= $duration_min ?>"
-                                    style="background-color: <?= getColorByState($app['stato']) ?>">
-                                    <?= htmlspecialchars($app['nome_servizio']) ?>
-                                </div>
-                                </div>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
                     </div>
                 </div>
-            <?php endforeach; ?>
+
+                <!-- Colonne per i 5 giorni con turni -->
+                <?php foreach ($giorniDisponibili as $giorno): ?>
+                    <?php
+                        $turni = $giorno['turni'];
+                        $ora_inizio_giorno = strtotime(min(array_column($turni, 'ora_inizio')));
+                        $ora_fine_giorno = strtotime(max(array_column($turni, 'ora_fine')));
+                    ?>
+                    <div class="day-column">
+                        <div class="day-header">
+                            <?= $giorno['giorno_settimana'] ?> <br>
+                            <?= date("d/m", strtotime($giorno['data'])) ?>
+                        </div>
+
+                        <!-- Contenitore slot + appuntamenti -->
+                        <div class="day-content">
+                            <?php for ($i = 0; $i < $slot_count; $i++): ?>
+                                <div class="slot">
+                                    <!-- Slot vuoto -->
+                                </div>
+                            <?php endfor; ?>
+
+                            <!-- Appuntamenti -->
+                            <?php foreach ($appuntamenti as $app): ?>
+                                <?php if ($app['data_app'] == $giorno['data']): ?>
+                                    <?php
+                                        $slot_height = 60;
+
+                                        // Cambiato: uso l'inizio del turno del giorno, non globale
+                                        $giorno_start = strtotime($giorno['turni'][0]['ora_inizio']);
+                                        $startApp = strtotime($app['ora_inizio']);
+                                        $offset_top_minutes = ($startApp - $giorno_start) / 60;
+                                        $duration_min = $app['durata'];
+                                    ?>
+                                    <div class="slot-container">
+                                    <div class="appointment"
+                                        data-minutes-from-start="<?= $offset_top_minutes ?>"
+                                        data-duration="<?= $duration_min ?>"
+                                        style="background-color: <?= getColorByState($app['stato']) ?>">
+                                        <?= htmlspecialchars($app['nome_servizio']) ?>
+                                    </div>
+                                    </div>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
         </div>
-    </div>
+    <?php endif; ?>
 
     <section id="contact">
         <h2>Contattaci</h2>

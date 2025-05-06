@@ -4,10 +4,16 @@ include 'funzioni.php';
 
 session_start();  
 
-if (isset($_SESSION['user']['ruolo']) && $_SESSION['user']['ruolo'] == 'BARBIERE') {
+if (!isset($_SESSION['user']['ruolo'])){
+    header("Location: registrazione.php");
+    exit();
+}elseif($_SESSION['user']['ruolo'] == 'BARBIERE') {
     header("Location: gestionale.php");
     exit();
-}
+}elseif($_SESSION['user']['ruolo'] == 'ADMIN') {
+    header("Location: adminOnly.php");
+    exit();
+}    
 
 $date = $time = $barbiere = $servizio = $salone = $message = '';
 

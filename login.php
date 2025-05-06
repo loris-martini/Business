@@ -37,7 +37,21 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
         $result = mysqli_stmt_get_result($stmt);
 
         if(mysqli_num_rows($result) > 0){
-            $message = checkPassword($result, $password);
+            $user = checkPassword($result, $password);
+            if ($user) {
+                $_SESSION['user'] = [
+                    'nome'    => $user['nome'],
+                    'cognome' => $user['cognome'],
+                    'mail'    => $user['mail'],
+                    'genere'  => $user['genere'],
+                    'ruolo'   => $user['ruolo']
+                ];
+
+                header("Location: index.php");
+                exit();
+            }else{
+                $message = "Email o password errati!";
+            }
         }else{
             $message = "Utente non trovato";   
         }
