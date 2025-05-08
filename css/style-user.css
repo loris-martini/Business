@@ -18,7 +18,7 @@
     border: 1px solid var(--primary-color);
 }
 
-.user-info td:first-child {
+.first {
     font-weight: 800;
 }
 

@@ -8,6 +8,6 @@
         $db_conn = @mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME);
         mysqli_set_charset($db_conn, 'utf8mb4');
     } catch (Exception $e) {
-        $error_message = $e->getMessage();        
+        die($e->getMessage());        
     }
 ?>
