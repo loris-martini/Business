@@ -12,6 +12,7 @@
         exit();
     }
 
+    $messageErr = '';
     $mail = $_SESSION['user']['mail'];
 
     // Recupera i turni futuri del barbiere ordinati per giorno e ora
@@ -56,10 +57,12 @@
     }
 
     // Recupera tutti gli appuntamenti futuri
-    $queryApp = "SELECT a.*, s.nome AS nome_servizio, s.durata FROM appuntamenti a
-                 JOIN turni_barbieri t ON a.fk_turno = t.id_turno
-                 JOIN servizi s ON a.fk_servizio = s.id_servizio
-                 WHERE t.fk_barbiere = ?";
+    $queryApp = "SELECT a.*, s.nome AS nome_servizio, s.durata, c.nome AS nome_cliente, c.mail AS mail_cliente
+             FROM appuntamenti a
+             JOIN turni_barbieri t ON a.fk_turno = t.id_turno
+             JOIN servizi s ON a.fk_servizio = s.id_servizio
+             JOIN utenti c ON a.fk_cliente = c.mail
+             WHERE t.fk_barbiere = ?";
 
     $stmt = mysqli_prepare($db_conn, $queryApp);
     mysqli_stmt_bind_param($stmt, "s", $mail);
@@ -84,6 +87,20 @@
     }
 
     $slot_count = ($global_ora_fine - $global_ora_inizio) / 3600;
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $to = $_POST['cliente_email'];
+        $message = $_POST['messaggio'];
+    
+        $subject = "Messaggio dal tuo barbiere";
+        $headers = "From: no-reply@tuosalone.com\r\nContent-Type: text/plain; charset=UTF-8";
+    
+        if (mail($to, $subject, $message, $headers)) {
+            $messageErr = "Messaggio inviato con successo!";
+        } else {
+            $messageErr = "Errore nell'invio del messaggio.";
+        }
+    }
 ?>
 
 <!DOCTYPE html>
@@ -106,6 +123,12 @@
     
 
     <h2>Agenda Settimanale</h2>
+    
+    <?php if (empty($messageErr)){ ?>
+        <div class="calendar-container">
+            <h2><?= $messageErr?></h2>
+        </div>
+    <?php };?>
 
     <?php if (empty($giorniDisponibili)): ?>
         <div class="calendar-container">
@@ -162,7 +185,10 @@
                                     <div class="appointment"
                                         data-minutes-from-start="<?= $offset_top_minutes ?>"
                                         data-duration="<?= $duration_min ?>"
-                                        style="background-color: <?= getColorByState($app['stato']) ?>">
+                                        data-nome-cliente="<?= htmlspecialchars($app['nome_cliente']) ?>"
+                                        data-mail-cliente="<?= htmlspecialchars($app['mail_cliente']) ?>"
+                                        onclick="openEmailModal(this)"
+                                        style="background-color: <?= getColorByState($app['stato']) ?>;">
                                         <?= htmlspecialchars($app['nome_servizio']) ?>
                                     </div>
                                     </div>
@@ -184,6 +210,22 @@
     <footer>
         <p>&copy; 2025 Il Tuo Salone di Parrucchiere</p>
     </footer>
+
+    <!-- Modal -->
+    <div id="emailModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h3>Contatta il cliente</h3>
+            <p><strong>Cliente:</strong> <span id="modalNomeCliente"></span></p>
+            <p><strong>Email:</strong> <span id="modalMailCliente"></span></p>
+            <form id="emailForm">
+                <input type="hidden" name="cliente_email" id="clienteEmailInput">
+                <textarea name="messaggio" id="messaggio" rows="5" placeholder="Scrivi il messaggio..."></textarea>
+                <button type="submit">Invia</button>
+            </form>
+            <div id="emailStatus"></div>
+        </div>
+    </div>
 </body>
 </html>
 
@@ -213,4 +255,39 @@
             app.style.height = `${duration * minuteToPixel}px`;
         });
     }
+
+    function openEmailModal(elem) {
+    const nome = elem.dataset.nomeCliente;
+    const mail = elem.dataset.mailCliente;
+
+    document.getElementById('modalNomeCliente').innerText = nome;
+    document.getElementById('modalMailCliente').innerText = mail;
+    document.getElementById('clienteEmailInput').value = mail;
+    document.getElementById('messaggio').value = '';
+    document.getElementById('emailStatus').innerText = '';
+
+    document.getElementById('emailModal').classList.remove('hidden');
+}
+
+function closeModal() {
+    document.getElementById('emailModal').classList.add('hidden');
+}
+
+document.getElementById('emailForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    fetch('invia_email.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.text())
+    .then(data => {
+        document.getElementById('emailStatus').innerText = data;
+    })
+    .catch(err => {
+        document.getElementById('emailStatus').innerText = 'Errore nell\'invio.';
+    });
+});
 </script>
