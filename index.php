@@ -124,6 +124,7 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
             <h2>Prenota il tuo appuntamento</h2>
             <form class="row g-3" id="form-registration" action="<?= htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST">
                 <table>
+                <span style="font-size: 13px;"><i>*se da problemi il form riavviare la pagina</i></span>
                     <!--INFO-->
                     <tr>
                         <td><label>Nome</label></td>

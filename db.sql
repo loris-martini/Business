@@ -114,6 +114,15 @@ CREATE TABLE appuntamenti (
         ON DELETE SET NULL
 ) ENGINE = InnoDB;
 
+-- INSERT --
+
+INSERT INTO `saloni` (`id_salone`, `nome`, `indirizzo`, `posti`, `orario_apertura`, `orario_chiusura`) VALUES (NULL, 'Pergine', 'Via Dante 3', '2', '08:00:00', '18:00:00');
+INSERT INTO `servizi` (`id_servizio`, `nome`, `durata`, `prezzo`) VALUES (NULL, 'Taglio', '30', '10'), (NULL, 'Colore', '45', '20');
+INSERT INTO `barbiere_salone` (`fk_barbiere`, `fk_salone`) VALUES ('fra.conci@gmail.com', '1');
+INSERT INTO `barbiere_servizio` (`fk_barbiere`, `fk_servizio`) VALUES ('fra.conci@gmail.com', '1');
+INSERT INTO `salone_servizio` (`fk_salone`, `fk_servizio`) VALUES ('1', '1'), ('1', '2');
+INSERT INTO `turni_barbieri` (`id_turno`, `fk_barbiere`, `fk_salone`, `giorno`, `ora_inizio`, `ora_fine`) VALUES (NULL, 'fra.conci@gmail.com', '1', 'Monday', '08:00:00', '12:00:00');
+
 
 -- TRIGGER --
 

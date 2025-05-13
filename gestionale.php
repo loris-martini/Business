@@ -89,8 +89,8 @@
     $slot_count = ($global_ora_fine - $global_ora_inizio) / 3600;
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $to = $_POST['cliente_email'];
-        $message = $_POST['messaggio'];
+        $to = filtro_testo($_POST['cliente_email']);
+        $message = filtro_testo($_POST['messaggio']);
     
         $subject = "Messaggio dal tuo barbiere";
         $headers = "From: no-reply@tuosalone.com\r\nContent-Type: text/plain; charset=UTF-8";
