@@ -74,23 +74,24 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
 
         $campi = ['nome', 'cognome', 'mail', 'password', 'numero_telefono'];
         $segnaposti = ['?', '?', '?', '?', '?'];
-        $valori = [':nome' => $nome, ':cognome' => $cognome, ':mail' => $mail, ':password' => $password, ':numero_telefono' => $telefono];
+        $valori = [$nome, $cognome, $mail, $password, $telefono];
 
-        if ($genere !== null) {
+        if ($genere !== null && $genere !== '') {
             $campi[] = 'genere';
             $segnaposti[] = '?';
-            $valori[':genere'] = $genere;
+            $valori[] = $genere;
         }
-        if ($residenza !== null) {
+        if ($residenza !== null && $residenza !== '') {
             $campi[] = 'residenza';
             $segnaposti[] = '?';
-            $valori[':residenza'] = $residenza;
+            $valori[] = $residenza;
         }
-        if ($data !== null) {
+        if ($data !== null && $data !== '') {
             $campi[] = 'data_nascita';
             $segnaposti[] = '?';
-            $valori[':data_nascita'] = $data;
+            $valori[] = $data;
         }
+
 
         $query = "INSERT INTO utenti (" . implode(", ", $campi) . ") VALUES (" . implode(", ", $segnaposti) . ")";
 
@@ -107,6 +108,9 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
             $dangerNome = $dangerCognome = $dangerMail = $dangerPassword = $dangerTelefono = $dangerResidenza = $dangerData = "";
             session_unset();
             header("Location: login.php");
+            exit();
+        }else{
+            die("Errore nel db: " . mysqli_stmt_error($stmt));
             exit();
         }
     }catch(Exception $ex){

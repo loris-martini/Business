@@ -88,19 +88,16 @@
 
     $slot_count = ($global_ora_fine - $global_ora_inizio) / 3600;
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $to = filtro_testo($_POST['cliente_email']);
-        $message = filtro_testo($_POST['messaggio']);
-    
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_email'])) {
+        $cliente_mail = filtro_testo($_POST['cliente_email']);
+        $messageMail = filtro_testo($_POST['messaggio']) . "<br>";
+        $mittente = $_SESSION['user']['mail'];
+
         $subject = "Messaggio dal tuo barbiere";
-        $headers = "From: no-reply@tuosalone.com\r\nContent-Type: text/plain; charset=UTF-8";
-    
-        if (mail($to, $subject, $message, $headers)) {
-            $messageErr = "Messaggio inviato con successo!";
-        } else {
-            $messageErr = "Errore nell'invio del messaggio.";
-        }
+
+        $messageErr = sendMail($subject, $messageMail, $mittente, $cliente_mail);
     }
+
 ?>
 
 <!DOCTYPE html>
@@ -124,7 +121,7 @@
 
     <h2>Agenda Settimanale</h2>
     
-    <?php if (empty($messageErr)){ ?>
+    <?php if (!empty($messageErr)){ ?>
         <div class="calendar-container">
             <h2><?= $messageErr?></h2>
         </div>
@@ -204,7 +201,7 @@
     <section id="contact">
         <h2>Contattaci</h2>
         <p>Email: info@tuosalone.com</p>
-        <p>Telefono: +39 012 3456789</p>
+        <p>Telefono: +39 3207666253</p>
     </section>
     
     <footer>
@@ -218,10 +215,10 @@
             <h3>Contatta il cliente</h3>
             <p><strong>Cliente:</strong> <span id="modalNomeCliente"></span></p>
             <p><strong>Email:</strong> <span id="modalMailCliente"></span></p>
-            <form id="emailForm">
+            <form id="emailForm" method="POST" action="">
                 <input type="hidden" name="cliente_email" id="clienteEmailInput">
-                <textarea name="messaggio" id="messaggio" rows="5" placeholder="Scrivi il messaggio..."></textarea>
-                <button type="submit">Invia</button>
+                <textarea name="messaggio" id="messaggio" rows="5" placeholder="Scrivi il messaggio..." required></textarea>
+                <button type="submit" name="submit_email">Invia</button>
             </form>
             <div id="emailStatus"></div>
         </div>
@@ -260,6 +257,7 @@
     const nome = elem.dataset.nomeCliente;
     const mail = elem.dataset.mailCliente;
 
+
     document.getElementById('modalNomeCliente').innerText = nome;
     document.getElementById('modalMailCliente').innerText = mail;
     document.getElementById('clienteEmailInput').value = mail;
@@ -272,22 +270,4 @@
 function closeModal() {
     document.getElementById('emailModal').classList.add('hidden');
 }
-
-document.getElementById('emailForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const formData = new FormData(this);
-
-    fetch('invia_email.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(res => res.text())
-    .then(data => {
-        document.getElementById('emailStatus').innerText = data;
-    })
-    .catch(err => {
-        document.getElementById('emailStatus').innerText = 'Errore nell\'invio.';
-    });
-});
 </script>

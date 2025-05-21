@@ -10,9 +10,9 @@ if (!isset($_GET['id'])){
 
 $id = filtro_testo($_GET['id']);
 
-$query = "SELECT * FROM appuntamenti a JOIN servizi s ON a.id_appuntamento = s.id_servizio WHERE a.id_appuntamento = ?";
+$query = "SELECT * FROM appuntamenti a JOIN servizi s ON a.fk_servizio = s.id_servizio WHERE a.id_appuntamento = ?";
 $stmt = mysqli_prepare($db_conn, $query);
-mysqli_stmt_bind_param($stmt, 's', $id);
+mysqli_stmt_bind_param($stmt, 'i', $id);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $appuntamento = mysqli_fetch_assoc($result);
@@ -26,7 +26,7 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
     if($codice == $appuntamento['codice']){
         $query = "UPDATE appuntamenti SET stato = 'CONFERMATO', codice = NULL WHERE id_appuntamento = ?";
         $stmt = mysqli_prepare($db_conn, $query);
-        mysqli_stmt_bind_param($stmt, 's', $id);
+        mysqli_stmt_bind_param($stmt, 'i', $id);
         mysqli_stmt_execute($stmt);
         if(mysqli_stmt_affected_rows($stmt) > 0){
             die('Appuntamento confermato con successo!');

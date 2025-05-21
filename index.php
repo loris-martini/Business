@@ -230,7 +230,7 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
     <section id="contact">
         <h2>Contattaci</h2>
         <p>Email: info@tuosalone.com</p>
-        <p>Telefono: +39 012 3456789</p>
+        <p>Telefono: +39 3207666253</p>
     </section>
     
     <footer>

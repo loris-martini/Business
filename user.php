@@ -115,7 +115,7 @@ try {
 
     // Cancellazione di un appuntamento
     if(isset($_POST['deleteApp']) && $_SERVER["REQUEST_METHOD"] == "POST"){
-        $query = "UPDATE appuntamenti SET stato = 'CANCELLATO' WHERE id_appuntamento = ?";
+        $query = "UPDATE appuntamenti SET stato = 'CANCELLATO', codice = NULL WHERE id_appuntamento = ?";
         $stmt = mysqli_prepare($db_conn, $query);
         mysqli_stmt_bind_param($stmt, "s", filtro_testo($_POST['id_appuntamento']));
         mysqli_stmt_execute($stmt);
@@ -261,7 +261,7 @@ try {
     <section id="contact">
         <h2>Contattaci</h2>
         <p>Email: info@tuosalone.com</p>
-        <p>Telefono: +39 012 3456789</p>
+        <p>Telefono: +39 3207666253</p>
     </section>
     </main>
     <footer>
