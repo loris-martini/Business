@@ -68,12 +68,13 @@ while ($row = mysqli_fetch_assoc($resultOrario)) {
                            FROM appuntamenti a
                            JOIN servizi s ON a.fk_servizio = s.id_servizio
                            WHERE a.fk_turno = ? 
-                           AND a.data_app = ? 
-                           AND (
-                               (a.ora_inizio <= ? AND ADDTIME(a.ora_inizio, SEC_TO_TIME(s.durata * 60)) > ?) OR 
-                               (a.ora_inizio < ? AND ADDTIME(a.ora_inizio, SEC_TO_TIME(s.durata * 60)) >= ?) OR
-                               (a.ora_inizio >= ? AND a.ora_inizio < ?)
-                           )";
+                            AND a.data_app = ? 
+                            AND a.stato != 'CANCELLATO'
+                            AND (
+                                (a.ora_inizio <= ? AND ADDTIME(a.ora_inizio, SEC_TO_TIME(s.durata * 60)) > ?) OR 
+                                (a.ora_inizio < ? AND ADDTIME(a.ora_inizio, SEC_TO_TIME(s.durata * 60)) >= ?) OR
+                                (a.ora_inizio >= ? AND a.ora_inizio < ?)
+                            )";
         $stmt1 = mysqli_prepare($db_conn, $query_barbiere);
         mysqli_stmt_bind_param($stmt1, 'ssssssss', 
             $id_turno, $data, 
@@ -103,6 +104,7 @@ while ($row = mysqli_fetch_assoc($resultOrario)) {
                         JOIN servizi s ON a.fk_servizio = s.id_servizio
                         WHERE tb.fk_salone = ? 
                         AND a.data_app = ? 
+                        AND a.stato != 'CANCELLATO'
                         AND (
                             (a.ora_inizio <= ? AND ADDTIME(a.ora_inizio, SEC_TO_TIME(s.durata * 60)) > ?) OR 
                             (a.ora_inizio < ? AND ADDTIME(a.ora_inizio, SEC_TO_TIME(s.durata * 60)) >= ?) OR

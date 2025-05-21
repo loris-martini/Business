@@ -50,19 +50,31 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
 
             if ($result && $row = mysqli_fetch_assoc($result)) {
                 $idTurno = $row['id_turno'];
+                do {
+                    $codice = generaCodice(6);
+                    $stmt = $db_conn->prepare("SELECT COUNT(*) FROM appuntamenti WHERE codice = ?");
+                    $stmt->bind_param("s", $codice);
+                    $stmt->execute();
+                    $stmt->bind_result($count);
+                    $stmt->fetch();
+                    $stmt->close();
+                } while ($count > 0);
 
-                $query = "INSERT INTO appuntamenti (fk_cliente, fk_turno, fk_servizio, data_app, ora_inizio) VALUES (?, ?, ?, ?, ?)";
+
+                $query = "INSERT INTO appuntamenti (fk_cliente, fk_turno, fk_servizio, data_app, ora_inizio, codice) VALUES (?, ?, ?, ?, ?, ?)";
                 $stmt = mysqli_prepare($db_conn, $query);
-                mysqli_stmt_bind_param($stmt, "siiss", $_SESSION['user']['mail'], $idTurno, $servizio, $date, $time);
+                mysqli_stmt_bind_param($stmt, "siisss", $_SESSION['user']['mail'], $idTurno, $servizio, $date, $time, $codice);
 
                 if (mysqli_stmt_execute($stmt)) {
+                    $idAppuntamento = mysqli_insert_id($db_conn);
                     mysqli_commit($db_conn);
 
                     // Invia l'email prima del reindirizzamento
                     $subject = "Conferma il tuo appuntamento!";
                     $emailMessage = "<h1>Conferma Appuntamento</h1>
                                     <p>Ciao " . htmlspecialchars($_SESSION['user']['nome']) . ",</p>
-                                    <p>Il tuo appuntamento è stato confermato per <strong>" . date("d/m/Y", strtotime($date)) . " alle " . date("H:i", strtotime($time)) . "</strong>.</p>";
+                                    <p>Per confermare il tuo appuntamento vai su: http://saloneconci.altervista.org/conferma.php?id=". $idAppuntamento . "</p>
+                                    <p>Utilizzando il <strong>Codice Utente</strong>: " . $codice . "</p>";
                     $_SESSION['message'] = sendMail($subject, $emailMessage, $barbiere, $_SESSION['user']['mail']);
 
                     // Reindirizza e interrompi l'esecuzione
@@ -228,7 +240,11 @@ if (isset($_POST['submit']) && $_SERVER["REQUEST_METHOD"] == "POST") {
         window.addEventListener("DOMContentLoaded", () => {
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('success') === '1') {
-                alert("Prenotazione effettuata con successo!");
+                if(!isset($_SESSION['message'])) {
+                    return;
+                }else{
+                    alert("<?= $_SESSION['message'] ?>");
+                }
                 // Rimuove il parametro dalla URL senza ricaricare la pagina
                 window.history.replaceState({}, document.title, window.location.pathname);
             }

@@ -1,4 +1,5 @@
 <?php
+
     function filtro_testo($text){
         return addslashes(filter_var(trim($text), FILTER_SANITIZE_FULL_SPECIAL_CHARS));
     }        
@@ -39,8 +40,17 @@
             case 'IN_ATTESA': return 'red';
             case 'CONFERMATO': return 'yellow';
             case 'COMPLETATO': return 'green';
-            case 'CANCELLATO': return 'black';
+            case 'CANCELLATO': return '#70707086';
             default: return 'gray'; // Colore di default se lo stato non è riconosciuto
         }
+    }
+
+    function generaCodice($length) {
+        $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        $codice = '';
+        for ($i = 0; $i < $length; $i++) {
+            $codice .= $chars[rand(0, strlen($chars) - 1)];
+        }
+        return $codice;
     }
 ?>

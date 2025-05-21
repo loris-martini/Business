@@ -101,6 +101,7 @@ CREATE TABLE appuntamenti (
     fk_servizio                 INT,
     data_app                    DATE                NOT NULL,
     ora_inizio                  TIME                NOT NULL,
+    codice                      CHAR(6)             NOT NULL UNIQUE,
     stato                       ENUM('IN_ATTESA', 'CONFERMATO', 'COMPLETATO', 'CANCELLATO') DEFAULT 'IN_ATTESA', /* Nuovo */
     PRIMARY KEY(id_appuntamento),
     FOREIGN KEY(fk_cliente)     REFERENCES utenti(mail)

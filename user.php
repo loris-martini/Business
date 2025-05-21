@@ -115,7 +115,7 @@ try {
 
     // Cancellazione di un appuntamento
     if(isset($_POST['deleteApp']) && $_SERVER["REQUEST_METHOD"] == "POST"){
-        $query = "DELETE FROM appuntamenti WHERE id_appuntamento = ?";
+        $query = "UPDATE appuntamenti SET stato = 'CANCELLATO' WHERE id_appuntamento = ?";
         $stmt = mysqli_prepare($db_conn, $query);
         mysqli_stmt_bind_param($stmt, "s", filtro_testo($_POST['id_appuntamento']));
         mysqli_stmt_execute($stmt);
@@ -186,16 +186,15 @@ try {
                 ?>
                 <tr>
                     <td><?=$appuntamenti['nome']?></td>
-                    <td><?=$appuntamenti['data_app']?></td>
-                    <td><?=$appuntamenti['ora_inizio']?></td>
-                    <td style="color: <?=$colore?>; font-weight: bold;"><?=$testoStato?></td>
-                    <td>
+                    <td><?=date("d/m/Y", strtotime($appuntamenti['data_app']))?></td>
+                    <td><?=date("H:i", strtotime($appuntamenti['ora_inizio']))?></td>
+                    <td style="color: <?=$colore?>; font-weight: bold;"><?=$testoStato?>
                         <?php if ($appuntamenti['stato'] != "CANCELLATO") { ?>
                             <form method="POST" action="<?= htmlspecialchars($_SERVER["PHP_SELF"]); ?>" onsubmit="return confirm('Sei sicuro di voler cancellare questo appuntamento?');">
                                 <input type="hidden" name="id_appuntamento" value="<?=$appuntamenti['id_appuntamento']?>">
-                                <button type="submit" name="deleteApp">Cancella</button>
+                                <input class="btn" type="submit" name="deleteApp" value="Cancella" style="color: red; background-color: #bebebe;">
                             </form>
-                        <?php } else { echo "-"; } ?>
+                        <?php }; ?>
                     </td>
                 </tr>
                 <?php } ?>
